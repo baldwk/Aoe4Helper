@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
+    <RestoreSuccess Condition=" '$(RestoreSuccess)' == '' ">True</RestoreSuccess>
+    <RestoreTool Condition=" '$(RestoreTool)' == '' ">NuGet</RestoreTool>
+    <ProjectAssetsFile Condition=" '$(ProjectAssetsFile)' == '' ">$(MSBuildThisFileDirectory)project.assets.json</ProjectAssetsFile>
+    <NuGetPackageRoot Condition=" '$(NuGetPackageRoot)' == '' ">$(UserProfile)\.nuget\packages\</NuGetPackageRoot>
+    <NuGetPackageFolders Condition=" '$(NuGetPackageFolders)' == '' ">C:\Users\wky\.nuget\packages\;D:\profession\VS tools\NuGetPackages</NuGetPackageFolders>
+    <NuGetProjectStyle Condition=" '$(NuGetProjectStyle)' == '' ">PackageReference</NuGetProjectStyle>
+    <NuGetToolVersion Condition=" '$(NuGetToolVersion)' == '' ">6.13.2</NuGetToolVersion>
+  </PropertyGroup>
+  <ItemGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
+    <SourceRoot Include="C:\Users\wky\.nuget\packages\" />
+    <SourceRoot Include="D:\profession\VS tools\NuGetPackages\" />
+  </ItemGroup>
+  <ImportGroup Condition=" '$(TargetFramework)' == 'net8-windows' AND '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Import Project="$(NuGetPackageRoot)microsoft.extensions.configuration.usersecrets\9.0.2\buildTransitive\net8.0\Microsoft.Extensions.Configuration.UserSecrets.props" Condition="Exists('$(NuGetPackageRoot)microsoft.extensions.configuration.usersecrets\9.0.2\buildTransitive\net8.0\Microsoft.Extensions.Configuration.UserSecrets.props')" />
+  </ImportGroup>
+  <ImportGroup Condition=" '$(TargetFramework)' == 'net9-windows' AND '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Import Project="$(NuGetPackageRoot)microsoft.extensions.configuration.usersecrets\9.0.2\buildTransitive\net8.0\Microsoft.Extensions.Configuration.UserSecrets.props" Condition="Exists('$(NuGetPackageRoot)microsoft.extensions.configuration.usersecrets\9.0.2\buildTransitive\net8.0\Microsoft.Extensions.Configuration.UserSecrets.props')" />
+  </ImportGroup>
+</Project>

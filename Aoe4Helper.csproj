@@ -1,0 +1,75 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+  <PropertyGroup>
+    <TargetFrameworks>net9-windows</TargetFrameworks>
+    <GenerateDocumentFile>true</GenerateDocumentFile>
+    <UseWpf>true</UseWpf>
+    <UseWindowsForms>true</UseWindowsForms>
+    <NoWarn>$(NoWarn);0067</NoWarn>
+    <OutputType>WinExe</OutputType>
+    <StartupObject />
+    <Platforms>AnyCPU;x64</Platforms>
+     <LangVersion>9.0</LangVersion>
+     <NuGetAuditMode>all</NuGetAuditMode>
+     <ApplicationIcon>logo.ico</ApplicationIcon>
+     <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.2" />
+    <PackageReference Include="System.Runtime" Version="4.3.1" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.2" />
+    <PackageReference Include="YamlDotNet" Version="16.3.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources/**" />
+    <Compile Remove="Resources\Menu\**" />
+    <EmbeddedResource Remove="Resources\Menu\**" />
+    <None Remove="Resources\Menu\**" />
+    <Page Remove="Resources\Menu\**" />
+    <Resource Remove="Resources\Menu\**" />
+    <None Remove="abbasid_dynasty-b722e3e4ee862226395c692e73cd14c18bc96c3469874d2e0d918305c70f8a69.png" />
+    <ProjectReference Include="..\AduSkin\AduSkin.csproj" />
+    <Resource Include="logo.ico" />
+    <Resource Include="logo.png" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net47'">
+    <PackageReference Include="CommunityToolkit.Mvvm">
+      <Version>8.2.2</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+    <PackageReference Include="CommunityToolkit.Mvvm">
+      <Version>8.2.2</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6-windows'">
+    <PackageReference Include="CommunityToolkit.Mvvm">
+      <Version>8.2.2</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+</Project>

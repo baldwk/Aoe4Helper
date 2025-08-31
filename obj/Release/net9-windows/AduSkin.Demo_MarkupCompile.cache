@@ -1,0 +1,20 @@
+﻿AduSkin.Demo
+
+
+winexe
+C#
+.cs
+E:\c# project\AduSkin-master\src\AduSkin.Demo\obj\Release\net9-windows\
+AduSkin.Demo
+none
+false
+TRACE;RELEASE;NET;NET9_0;NETCOREAPP
+E:\c# project\AduSkin-master\src\AduSkin.Demo\App.xaml
+271221891307
+1116-888597195
+5396112428
+355519148354
+MainWindow.xaml;Style\BaseStyle.xaml;Style\Converter.xaml;Style\ShowControl.xaml;UserControls\BaiduTranslate.xaml;UserControls\CarouselContainer.xaml;UserControls\ContextMenuDemo.xaml;UserControls\CoverFlowDemo.xaml;UserControls\DataGridDemo.xaml;UserControls\ExpanderMenu.xaml;UserControls\FormVerificationDemo.xaml;UserControls\HttpTool.xaml;UserControls\ImageTool.xaml;UserControls\MessageBoxDemo.xaml;UserControls\MultiFunctionTabControl.xaml;UserControls\NavigationPanel.xaml;UserControls\NoticeDemo.xaml;UserControls\RunningBlockDemo.xaml;UserControls\SortGroup.xaml;UserControls\StepBarDemo.xaml;UserControls\TimeBarDemo.xaml;UserControls\TimeLine.xaml;UserControls\TransitioningContentControlDemo.xaml;UserControls\TreeMenu.xaml;UserControls\UploadPic.xaml;UserControls\VideoPlayer.xaml;Views\CommonControlCase.xaml;
+
+False
+
