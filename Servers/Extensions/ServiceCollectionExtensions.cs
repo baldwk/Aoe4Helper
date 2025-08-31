@@ -22,6 +22,7 @@ namespace AduSkin.Demo.Servers.Extensions
                 .GetTypes()
                 .Where(x =>
                     x.IsClass
+                    && x.Namespace != null
                     && x.Namespace!.StartsWith(namespaceName, StringComparison.InvariantCultureIgnoreCase)
                 );
 

@@ -22,6 +22,13 @@ using System.Reflection.Metadata;
 
 namespace Aoe4Helper
 {
+   public enum BuildingType
+   {
+      Stable,   // 马厩
+      Barracks, // 兵营
+      Archery   // 射箭场
+   }
+   
    public class CivConfig
    {
       public string tc { get; set; }
@@ -44,168 +51,135 @@ namespace Aoe4Helper
    }
    public partial class MainWindow : IWindow
    {
-
-      private DispatcherTimer tcProducer;
-      private List<DispatcherTimer> stableProducer, archeryProducer, barracksProducer;
-
-      private Dictionary<string, CivConfig> civConfigs;
-
+      #region Win32 API导入
       [DllImport("user32.dll")]
       public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
       [DllImport("user32.dll")]
       public static extern bool PostMessage(IntPtr hWnd, uint Msg, int wParam, int lParam);
+
       [DllImport("user32.dll")]
       public static extern int SendMessage(IntPtr hWnd, int wMsg, IntPtr wParam, IntPtr lParam);
+      #endregion
 
-      Random rnd = new Random();
+      #region 常量定义
 
-      private double intervalMultiplier = 1.0;
-
-      const int WM_SYSKEYDOWN = 0x0104;
-      const int WM_SYSKEYUP = 0x0105;
-      public const Int32 WM_CHAR = 0x0102;
+      // 游戏窗口名称
+      private const string GAME_WINDOW_NAME = "Age of Empires IV ";
+      
+      // 窗口消息常量
+      private const int WM_SYSKEYDOWN = 0x0104;
+      private const int WM_SYSKEYUP = 0x0105;
+      private const int WM_CHAR = 0x0102;
       private const int WM_KEYDOWN = 0x100;
       private const int WM_KEYUP = 0x0101;
-      const int WM_LBUTTONDOWN = 0x0201;
-      const int WM_LBUTTONUP = 0x0202;
-      private const int VK_LBUTTON = 0X1; //Left mouse button. 
-      private const int VK_RBUTTON = 0X2; //Right mouse button. 
-      private const int VK_CANCEL = 0X3; //Used for control-break processing. 
-      private const int VK_MBUTTON = 0X4; //''Middle mouse button (3-button mouse). 
-      private const int KEYEVENTF_KEYUP = 0X2; // Release key 
-      private const int VK_OEM_PERIOD = 0XBE; //.
-      private const int KEYEVENTF_EXTENDEDKEY = 0X1;
-      private const int VK_STARTKEY = 0X5B; //Start Menu key 
-      private const int VK_OEM_COMMA = 0XBC; //, comma 
-      public const int VK_0 = 0x30;
-      public const int VK_1 = 0x31;
-      public const int VK_2 = 0x32;
-      public const int VK_3 = 0x33;
-      public const int VK_4 = 0x34;
-      public const int VK_5 = 0x35;
-      public const int VK_6 = 0x36;
-      public const int VK_7 = 0x37;
-      public const int VK_8 = 0x38;
-      public const int VK_9 = 0x39;
-      public const int VK_A = 0x41;
-      public const int VK_B = 0x42;
-      public const int VK_C = 0x43;
-      public const int VK_D = 0x44;
-      public const int VK_E = 0x45;
-      public const int VK_F = 0x46;
-      public const int VK_G = 0x47;
-      public const int VK_H = 0x48;
-      public const int VK_I = 0x49;
-      public const int VK_J = 0x4A;
-      public const int VK_K = 0x4B;
-      public const int VK_L = 0x4C;
-      public const int VK_M = 0x4D;
-      public const int VK_N = 0x4E;
-      public const int VK_O = 0x4F;
-      public const int VK_P = 0x50;
-      public const int VK_Q = 0x51;
-      public const int VK_R = 0x52;
-      public const int VK_S = 0x53;
-      public const int VK_T = 0x54;
-      public const int VK_U = 0x55;
-      public const int VK_V = 0x56;
-      public const int VK_W = 0x57;
-      public const int VK_X = 0x58;
-      public const int VK_Y = 0x59;
-      public const int VK_Z = 0x5A;
-      public const int VK_BACK = 0x08;
-      public const int VK_TAB = 0x09;
-      public const int VK_CLEAR = 0x0C;
-      public const int VK_RETURN = 0x0D;
-      public const int VK_SHIFT = 0x10;
-      public const int VK_CONTROL = 0x11;
-      public const int VK_MENU = 0x12;
-      public const int VK_PAUSE = 0x13;
-      public const int VK_CAPITAL = 0x14;
-      public const int VK_KANA = 0x15;
-      public const int VK_HANGEUL = 0x15;
-      public const int VK_HANGUL = 0x15;
-      public const int VK_JUNJA = 0x17;
-      public const int VK_FINAL = 0x18;
-      public const int VK_HANJA = 0x19;
-      public const int VK_KANJI = 0x19;
-      public const int VK_ESCAPE = 0x1B;
-      public const int VK_CONVERT = 0x1C;
-      public const int VK_NONCONVERT = 0x1D;
-      public const int VK_ACCEPT = 0x1E;
-      public const int VK_MODECHANGE = 0x1F;
-      public const int VK_SPACE = 0x20;
-      public const int VK_PRIOR = 0x21;
-      public const int VK_NEXT = 0x22;
-      public const int VK_END = 0x23;
-      public const int VK_HOME = 0x24;
-      public const int VK_LEFT = 0x25;
-      public const int VK_UP = 0x26;
-      public const int VK_RIGHT = 0x27;
-      public const int VK_DOWN = 0x28;
-      public const int VK_SELECT = 0x29;
-      public const int VK_PRINT = 0x2A;
-      public const int VK_EXECUTE = 0x2B;
-      public const int VK_SNAPSHOT = 0x2C;
-      public const int VK_INSERT = 0x2D;
-      public const int VK_DELETE = 0x2E;
-      public const int VK_HELP = 0x2F;
-      public const int VK_LWIN = 0x5B;
-      public const int VK_RWIN = 0x5C;
-      public const int VK_APPS = 0x5D;
-      public const int VK_SLEEP = 0x5F;
-      public const int VK_NUMPAD0 = 0x60;
-      public const int VK_NUMPAD1 = 0x61;
-      public const int VK_NUMPAD2 = 0x62;
-      public const int VK_NUMPAD3 = 0x63;
-      public const int VK_NUMPAD4 = 0x64;
-      public const int VK_NUMPAD5 = 0x65;
-      public const int VK_NUMPAD6 = 0x66;
-      public const int VK_NUMPAD7 = 0x67;
-      public const int VK_NUMPAD8 = 0x68;
-      public const int VK_NUMPAD9 = 0x69;
-      public const int VK_MULTIPLY = 0x6A;
-      public const int VK_ADD = 0x6B;
-      public const int VK_SEPARATOR = 0x6C;
-      public const int VK_SUBTRACT = 0x6D;
-      public const int VK_DECIMAL = 0x6E;
-      public const int VK_DIVIDE = 0x6F;
-      public const int VK_F1 = 0x70;
-      public const int VK_F2 = 0x71;
-      public const int VK_F3 = 0x72;
-      public const int VK_F4 = 0x73;
-      public const int VK_F5 = 0x74;
-      public const int VK_F6 = 0x75;
-      public const int VK_F7 = 0x76;
-      public const int VK_F8 = 0x77;
-      public const int VK_F9 = 0x78;
-      public const int VK_F10 = 0x79;
+      private const int WM_LBUTTONDOWN = 0x0201;
+      private const int WM_LBUTTONUP = 0x0202;
+      
+      // 鼠标按键常量
+      private const int VK_LBUTTON = 0X1; // 鼠标左键
+      private const int VK_RBUTTON = 0X2; // 鼠标右键
+      private const int VK_MBUTTON = 0X4; // 鼠标中键
+      
+      // 键盘事件标志
+      private const int KEYEVENTF_KEYUP = 0X2; // 释放按键
+      private const int KEYEVENTF_EXTENDEDKEY = 0X1; 
+      // 数字键常量
+      private const int VK_0 = 0x30;
+      private const int VK_1 = 0x31;
+      private const int VK_2 = 0x32;
+      private const int VK_3 = 0x33;
+      private const int VK_4 = 0x34;
+      private const int VK_5 = 0x35;
+      private const int VK_6 = 0x36;
+      private const int VK_7 = 0x37;
+      private const int VK_8 = 0x38;
+      private const int VK_9 = 0x39;
+      // 字母键常量
+      private const int VK_A = 0x41;
+      private const int VK_B = 0x42;
+      private const int VK_C = 0x43;
+      private const int VK_D = 0x44;
+      private const int VK_E = 0x45;
+      private const int VK_F = 0x46;
+      private const int VK_G = 0x47;
+      private const int VK_H = 0x48;
+      private const int VK_I = 0x49;
+      private const int VK_J = 0x4A; // 兵营选择键
+      private const int VK_K = 0x4B; // 射箭场选择键
+      private const int VK_L = 0x4C; // 马厩选择键
+      private const int VK_M = 0x4D;
+      private const int VK_N = 0x4E;
+      private const int VK_O = 0x4F;
+      private const int VK_P = 0x50;
+      private const int VK_Q = 0x51; // 生产键Q
+      private const int VK_R = 0x52; // 生产键R
+      private const int VK_S = 0x53;
+      private const int VK_T = 0x54;
+      private const int VK_U = 0x55;
+      private const int VK_V = 0x56;
+      private const int VK_W = 0x57; // 生产键W
+      private const int VK_X = 0x58;
+      private const int VK_Y = 0x59;
+      private const int VK_Z = 0x5A;
+      // 功能键常量
+      private const int VK_ESCAPE = 0x1B; // ESC键
+      private const int VK_SPACE = 0x20;  // 空格键
+      
+      // 鼠标点击位置常量
+      private const int CLICK_X_BEFORE = 500;
+      private const int CLICK_Y_BEFORE = 800;
+      private const int CLICK_X_AFTER = 1000;
+      private const int CLICK_Y_AFTER = 800;
+      
+      // 游戏相关常量
+      private const double MA_MULTIPLIER = 0.66; // MA加速倍率
+      private const int PRODUCTION_KEYS_COUNT = 4; // 生产按键数量 Q,W,E,R
+      private const string CONFIG_FILE = "./prod.tab";
+      private const string DEFAULT_CIV = "rus";
+      
+      // 时间和计算相关常量
+      private const int TIMER_ADJUSTMENT_MICROSECONDS = -100; // 定时器调整微秒
+      private const int SECONDS_PER_MINUTE = 60; // 每分钟秒数
+      #endregion
+
+      #region 私有字段
+      private DispatcherTimer tcProducer;
+      private List<DispatcherTimer> stableProducer, archeryProducer, barracksProducer;
+      private Dictionary<string, CivConfig> civConfigs;
+      private Random rnd = new Random();
+      private double intervalMultiplier = 1.0;
 
       private int tcNumber;
-      private int[] stableProd = new int[] { 0, 0, 0, 0 };
+      private int[] stableProd = new int[PRODUCTION_KEYS_COUNT];
+      private int[] archeryProd = new int[PRODUCTION_KEYS_COUNT];
+      private int[] barracksProd = new int[PRODUCTION_KEYS_COUNT];
 
-      private int[] archeryProd = new int[] { 0, 0, 0, 0 };
-      private int[] barracksProd = new int[] { 0, 0, 0, 0 };
+      private bool tcEnabled = false;
+      private bool stableEnabled = false; 
+      private bool archeryEnabled = false;
+      private bool barracksEnabled = false;
+      private string civ = DEFAULT_CIV;
+      #endregion
 
-      private Boolean tcEnabled = false, stableEnabled = false, archeryEnabled = false, barracksEnabled = false;
-      private string civ = "rus";
-
+      #region 构造函数和初始化
       public MainWindow(MainViewModel viewModel)
       {
-         loadCivConfig();
+         LoadCivConfig();
          InitializeComponent();
          this.DataContext = viewModel;
          this.Closed += delegate { Application.Current.Shutdown(); };
-         initTimer();
+         InitTimer();
       }
+      #endregion
 
-      private void loadCivConfig()
+      #region 配置加载
+      private void LoadCivConfig()
       {
          var serializer = new SerializerBuilder().WithNamingConvention(CamelCaseNamingConvention.Instance).Build();
          var deserializer = new DeserializerBuilder().WithNamingConvention(UnderscoredNamingConvention.Instance).Build();
 
-         var ymlFile = "./prod.tab";
+         var ymlFile = CONFIG_FILE;
          if (File.Exists(ymlFile))
          {
             var ymlContent = File.ReadAllText(ymlFile); // 读取 yaml 文件内容
@@ -216,56 +190,113 @@ namespace Aoe4Helper
             }
          }
       }
+      #endregion
 
-      private void initTimer()
+      #region 定时器初始化
+      private void InitTimer()
       {
-         // Initialize tcProducer  
+         // 初始化TC生产器
          tcProducer = new DispatcherTimer
          {
             Interval = TimeSpan.FromSeconds(0)
          };
-         tcProducer.Tick += tcProduce;
+         tcProducer.Tick += (s, e) => TcProduce();
 
-         // Initialize stableProducer  
-         stableProducer = new List<DispatcherTimer>();
-         for (int i = 0; i < 4; i++)
-         {
-            DispatcherTimer prod = new DispatcherTimer { Interval = TimeSpan.FromSeconds(0) };
-            stableProducer.Add(prod);
-         }
-         stableProducer[0].Tick += s_q_produce;
-         stableProducer[1].Tick += s_w_produce;
-         stableProducer[2].Tick += s_e_produce;
-         stableProducer[3].Tick += s_r_produce;
-         // Initialize barracksProducer  
-         barracksProducer = new List<DispatcherTimer>();
-         for (int i = 0; i < 4; i++)
-         {
-            DispatcherTimer prod = new DispatcherTimer { Interval = TimeSpan.FromSeconds(0) };
-            barracksProducer.Add(prod);
-         }
-         barracksProducer[0].Tick += b_q_produce;
-         barracksProducer[1].Tick += b_w_produce;
-         barracksProducer[2].Tick += b_e_produce;
-         barracksProducer[3].Tick += b_r_produce;
+         // 初始化马厩生产器
+         stableProducer = CreateProducerTimers();
+         stableProducer[0].Tick += (s, e) => ProduceUnits(BuildingType.Stable, 0, VK_Q);
+         stableProducer[1].Tick += (s, e) => ProduceUnits(BuildingType.Stable, 1, VK_W);
+         stableProducer[2].Tick += (s, e) => ProduceUnits(BuildingType.Stable, 2, VK_E);
+         stableProducer[3].Tick += (s, e) => ProduceUnits(BuildingType.Stable, 3, VK_R);
+         
+         // 初始化兵营生产器  
+         barracksProducer = CreateProducerTimers();
+         barracksProducer[0].Tick += (s, e) => ProduceUnits(BuildingType.Barracks, 0, VK_Q);
+         barracksProducer[1].Tick += (s, e) => ProduceUnits(BuildingType.Barracks, 1, VK_W);
+         barracksProducer[2].Tick += (s, e) => ProduceUnits(BuildingType.Barracks, 2, VK_E);
+         barracksProducer[3].Tick += (s, e) => ProduceUnits(BuildingType.Barracks, 3, VK_R);
 
-         // Initialize archeryProducer  
-         archeryProducer = new List<DispatcherTimer>();
-         for (int i = 0; i < 4; i++)
-         {
-            DispatcherTimer prod = new DispatcherTimer { Interval = TimeSpan.FromSeconds(0) };
-            archeryProducer.Add(prod);
-         }
-         archeryProducer[0].Tick += a_q_produce;
-         archeryProducer[1].Tick += a_w_produce;
-         archeryProducer[2].Tick += a_e_produce;
-         archeryProducer[3].Tick += a_r_produce;
+         // 初始化射箭场生产器
+         archeryProducer = CreateProducerTimers();
+         archeryProducer[0].Tick += (s, e) => ProduceUnits(BuildingType.Archery, 0, VK_Q);
+         archeryProducer[1].Tick += (s, e) => ProduceUnits(BuildingType.Archery, 1, VK_W);
+         archeryProducer[2].Tick += (s, e) => ProduceUnits(BuildingType.Archery, 2, VK_E);
+         archeryProducer[3].Tick += (s, e) => ProduceUnits(BuildingType.Archery, 3, VK_R);
       }
+      
+      private List<DispatcherTimer> CreateProducerTimers()
+      {
+         var timers = new List<DispatcherTimer>();
+         for (int i = 0; i < PRODUCTION_KEYS_COUNT; i++)
+         {
+            timers.Add(new DispatcherTimer { Interval = TimeSpan.FromSeconds(0) });
+         }
+         return timers;
+      }
+      #endregion
 
-      private void updateInterval()
+      #region 通用工具方法
+      /// <summary>
+      /// 通用的单位生产方法
+      /// </summary>
+      /// <param name="buildingType">建筑类型</param>
+      /// <param name="keyIndex">按键索引 (0=Q, 1=W, 2=E, 3=R)</param>
+      /// <param name="productionKey">生产按键</param>
+      private void ProduceUnits(BuildingType buildingType, int keyIndex, int productionKey)
+      {
+         var productionArray = GetProductionArray(buildingType);
+         int num = productionArray[keyIndex];
+         
+         if (num <= 0) return;
+         
+         IntPtr gameWindow = FindWindow(null, GAME_WINDOW_NAME);
+         MouseClickBefore(gameWindow);
+         SelectBuilding(gameWindow, buildingType);
+         
+         for (int i = 0; i < num; i++)
+         {
+            SendMessage(gameWindow, WM_SYSKEYDOWN, productionKey, 0);
+         }
+         
+         SendMessage(gameWindow, WM_SYSKEYDOWN, VK_ESCAPE, 0);
+      }
+      
+      /// <summary>
+      /// 根据建筑类型获取对应的生产数组
+      /// </summary>
+      private int[] GetProductionArray(BuildingType buildingType)
+      {
+         return buildingType switch
+         {
+            BuildingType.Stable => stableProd,
+            BuildingType.Barracks => barracksProd,
+            BuildingType.Archery => archeryProd,
+            _ => throw new ArgumentException($"不支持的建筑类型: {buildingType}")
+         };
+      }
+      
+      /// <summary>
+      /// 选择指定的建筑
+      /// </summary>
+      private void SelectBuilding(IntPtr gameWindow, BuildingType buildingType)
+      {
+         int selectionKey = buildingType switch
+         {
+            BuildingType.Stable => VK_L,
+            BuildingType.Barracks => VK_J,
+            BuildingType.Archery => VK_K,
+            _ => throw new ArgumentException($"不支持的建筑类型: {buildingType}")
+         };
+         
+         SendMessage(gameWindow, WM_KEYDOWN, selectionKey, buildingType == BuildingType.Stable ? 0x20000000 : 0);
+      }
+      #endregion
+      
+      #region 时间间隔更新
+      private void UpdateInterval()
       {
          CivConfig config = civConfigs[civ];
-         TimeSpan diff = TimeSpan.FromMicroseconds(-100);
+         TimeSpan diff = TimeSpan.FromMicroseconds(TIMER_ADJUSTMENT_MICROSECONDS);
          tcProducer.Interval = TimeSpan.FromSeconds(int.Parse(config.tc.Split(',').Last()));
          int s_q_interval = (int)(int.Parse(config.s_q.Split(',').Last()) * intervalMultiplier);
          if (s_q_interval > 0)
@@ -333,8 +364,8 @@ namespace Aoe4Helper
       {
          ComboBoxItem cbx = ((sender as AduComboBox).SelectedItem as ComboBoxItem);
          civ = cbx.Name;
-         updateInterval();
-         calcFarmerCount();
+         UpdateInterval();
+         CalcFarmerCount();
       }
 
 
@@ -348,7 +379,7 @@ namespace Aoe4Helper
          if (((AduSkin.Controls.Metro.MetroSwitch)sender).IsChecked == true)
          {
             tcEnabled = true;
-            tcProduce(null, null);
+            TcProduce();
             if (tcProducer.Interval.TotalSeconds > 0)
             {
                tcProducer.Start();
@@ -359,535 +390,258 @@ namespace Aoe4Helper
             tcEnabled = false;
             tcProducer.Stop();
          }
-         calcFarmerCount();
+         CalcFarmerCount();
       }
 
+      #region 鼠标操作方法
       private int MAKELPARAM(int p, int p_2)
       {
          return ((p_2 << 16) | (p & 0xFFFF));
       }
 
-      private void mouseClickAfter(IntPtr window)
+      private void MouseClickAfter(IntPtr window)
       {
-         int x = 1000;
-         int y = 800;
-         PostMessage(window, WM_LBUTTONDOWN, 0, MAKELPARAM(x, y));
-         PostMessage(window, WM_LBUTTONUP, 0, MAKELPARAM(x, y));
+         PostMessage(window, WM_LBUTTONDOWN, 0, MAKELPARAM(CLICK_X_AFTER, CLICK_Y_AFTER));
+         PostMessage(window, WM_LBUTTONUP, 0, MAKELPARAM(CLICK_X_AFTER, CLICK_Y_AFTER));
       }
 
-      private void mouseClickBefore(IntPtr window)
+      private void MouseClickBefore(IntPtr window)
       {
-         int x = 500;
-         int y = 800;
-         SendMessage(window, WM_LBUTTONDOWN, 0, MAKELPARAM(x, y));
-         SendMessage(window, WM_LBUTTONUP, 0, MAKELPARAM(x, y));
+         SendMessage(window, WM_LBUTTONDOWN, 0, MAKELPARAM(CLICK_X_BEFORE, CLICK_Y_BEFORE));
+         SendMessage(window, WM_LBUTTONUP, 0, MAKELPARAM(CLICK_X_BEFORE, CLICK_Y_BEFORE));
       }
+      #endregion
 
-      private void tcProduce(object sender, EventArgs e)
+      #region TC生产方法
+      private void TcProduce()
       {
-         if (tcNumber <= 0)
-         {
-            return;
-         }
-         IntPtr WindowToFind = FindWindow(null, "Age of Empires IV "); // Window Titel
-
-         mouseClickBefore(WindowToFind);
-         SendMessage(WindowToFind, WM_SYSKEYDOWN, VK_SPACE, 0);
-         //PostMessage(WindowToFind, WM_KEYDOWN, VK_SPACE, 0);
+         if (tcNumber <= 0) return;
+         
+         IntPtr gameWindow = FindWindow(null, GAME_WINDOW_NAME);
+         MouseClickBefore(gameWindow);
+         SendMessage(gameWindow, WM_SYSKEYDOWN, VK_SPACE, 0);
 
          for (int i = 0; i < tcNumber; i++)
          {
-            SendMessage(WindowToFind, WM_SYSKEYDOWN, VK_Q, 0);
-            // PostMessage(WindowToFind, WM_SYSKEYUP, VK_Q, 0);
-
+            SendMessage(gameWindow, WM_SYSKEYDOWN, VK_Q, 0);
          }
-         SendMessage(WindowToFind, WM_SYSKEYDOWN, VK_ESCAPE, 0);
+         
+         SendMessage(gameWindow, WM_SYSKEYDOWN, VK_ESCAPE, 0);
       }
+      #endregion
 
+      #region 建筑开关事件处理
       private void Archery_Checked(object sender, RoutedEventArgs e)
       {
-         if (((AduSkin.Controls.Metro.MetroSwitch)sender).IsChecked == true)
+         archeryEnabled = ((AduSkin.Controls.Metro.MetroSwitch)sender).IsChecked == true;
+         
+         if (archeryEnabled)
          {
-            archeryEnabled = true;
-            a_q_produce(null, null);
-            a_w_produce(null, null);
-            a_e_produce(null, null);
-            a_r_produce(null, null);
+            // 立即执行一次生产
+            for (int i = 0; i < PRODUCTION_KEYS_COUNT; i++)
+            {
+               var keyValue = new[] { VK_Q, VK_W, VK_E, VK_R }[i];
+               ProduceUnits(BuildingType.Archery, i, keyValue);
+            }
 
             archeryProducer.ForEach(t =>
             {
-               if (t.Interval.TotalSeconds > 0)
-               {
-                  t.Start();
-               }
+               if (t.Interval.TotalSeconds > 0) t.Start();
             });
          }
          else
          {
-            archeryEnabled = false;
             archeryProducer.ForEach(t => t.Stop());
          }
-         calcFarmerCount();
-
+         
+         CalcFarmerCount();
       }
 
       private void Barracks_Checked(object sender, RoutedEventArgs e)
       {
-         if (((AduSkin.Controls.Metro.MetroSwitch)sender).IsChecked == true)
+         barracksEnabled = ((AduSkin.Controls.Metro.MetroSwitch)sender).IsChecked == true;
+         
+         if (barracksEnabled)
          {
-            barracksEnabled = true;
-            b_q_produce(null, null);
-            b_w_produce(null, null);
-            b_e_produce(null, null);
-            b_r_produce(null, null);
+            // 立即执行一次生产
+            for (int i = 0; i < PRODUCTION_KEYS_COUNT; i++)
+            {
+               var keyValue = new[] { VK_Q, VK_W, VK_E, VK_R }[i];
+               ProduceUnits(BuildingType.Barracks, i, keyValue);
+            }
+
             barracksProducer.ForEach(t =>
             {
-               if (t.Interval.TotalSeconds > 0)
-               {
-                  t.Start();
-               }
+               if (t.Interval.TotalSeconds > 0) t.Start();
             });
          }
          else
          {
-            barracksEnabled = false;
             barracksProducer.ForEach(t => t.Stop());
          }
-         calcFarmerCount();
+         
+         CalcFarmerCount();
       }
 
       private void Stable_Checked(object sender, RoutedEventArgs e)
       {
-         if (((AduSkin.Controls.Metro.MetroSwitch)sender).IsChecked == true)
+         stableEnabled = ((AduSkin.Controls.Metro.MetroSwitch)sender).IsChecked == true;
+         
+         if (stableEnabled)
          {
-            stableEnabled = true;
-            s_q_produce(null, null);
-            s_w_produce(null, null);
-            s_e_produce(null, null);
-            s_r_produce(null, null);
+            // 立即执行一次生产
+            for (int i = 0; i < PRODUCTION_KEYS_COUNT; i++)
+            {
+               var keyValue = new[] { VK_Q, VK_W, VK_E, VK_R }[i];
+               ProduceUnits(BuildingType.Stable, i, keyValue);
+            }
+
             stableProducer.ForEach(t =>
             {
-               if (t.Interval.TotalSeconds > 0)
-               {
-                  t.Start();
-               }
+               if (t.Interval.TotalSeconds > 0) t.Start();
             });
          }
          else
          {
-            stableEnabled = false;
             stableProducer.ForEach(t => t.Stop());
          }
-         calcFarmerCount();
+         
+         CalcFarmerCount();
       }
+      #endregion
 
-      private void selectStable(IntPtr WindowToFind)
-      {
-         SendMessage(WindowToFind, WM_KEYDOWN, VK_L, 0x20000000);
-      }
-
-      private void s_q_produce(object sender, EventArgs e)
-      {
-         int num = stableProd[0];
-         if (num <= 0)
-         {
-            return;
-         }
-         IntPtr WindowToFind = FindWindow(null, "Age of Empires IV "); // Window Titel
-         mouseClickBefore(WindowToFind);
-         selectStable(WindowToFind);
-         for (int i = 0; i < num; i++)
-         {
-            SendMessage(WindowToFind, WM_SYSKEYDOWN, VK_Q, 0);
-         }
-         SendMessage(WindowToFind, WM_SYSKEYDOWN, VK_ESCAPE, 0);
-      }
-
-      private void s_w_produce(object sender, EventArgs e)
-      {
-         int num = stableProd[1];
-         if (num <= 0)
-         {
-            return;
-         }
-         IntPtr WindowToFind = FindWindow(null, "Age of Empires IV "); // Window Titel
-         mouseClickBefore(WindowToFind);
-         selectStable(WindowToFind);
-         for (int i = 0; i < num; i++)
-         {
-            SendMessage(WindowToFind, WM_SYSKEYDOWN, VK_W, 0);
-         }
-         SendMessage(WindowToFind, WM_SYSKEYDOWN, VK_ESCAPE, 0);
-      }
-
-      private void s_e_produce(object sender, EventArgs e)
-      {
-         int num = stableProd[2];
-         if (num <= 0)
-         {
-            return;
-         }
-         IntPtr WindowToFind = FindWindow(null, "Age of Empires IV "); // Window Titel
-         mouseClickBefore(WindowToFind);
-         selectStable(WindowToFind);
-         for (int i = 0; i < num; i++)
-         {
-            SendMessage(WindowToFind, WM_SYSKEYDOWN, VK_E, 0);
-         }
-         SendMessage(WindowToFind, WM_SYSKEYDOWN, VK_ESCAPE, 0);
-      }
-
-      private void s_r_produce(object sender, EventArgs e)
-      {
-         int num = stableProd[3];
-         if (num <= 0)
-         {
-            return;
-         }
-         IntPtr WindowToFind = FindWindow(null, "Age of Empires IV "); // Window Titel
-         mouseClickBefore(WindowToFind);
-         selectStable(WindowToFind);
-         for (int i = 0; i < num; i++)
-         {
-            SendMessage(WindowToFind, WM_SYSKEYDOWN, VK_R, 0);
-         }
-         SendMessage(WindowToFind, WM_SYSKEYDOWN, VK_ESCAPE, 0);
-      }
-
-
-      private void selectArchery(IntPtr WindowToFind)
-      {
-         SendMessage(WindowToFind, WM_KEYDOWN, VK_K, 0);
-
-      }
-      private void a_q_produce(object sender, EventArgs e)
-      {
-         int num = archeryProd[0];
-         if (num <= 0)
-         {
-            return;
-         }
-         IntPtr WindowToFind = FindWindow(null, "Age of Empires IV "); // Window Titel
-         mouseClickBefore(WindowToFind);
-         selectArchery(WindowToFind);
-         for (int i = 0; i < num; i++)
-         {
-            SendMessage(WindowToFind, WM_SYSKEYDOWN, VK_Q, 0);
-         }
-         SendMessage(WindowToFind, WM_SYSKEYDOWN, VK_ESCAPE, 0);
-      }
-
-      private void a_w_produce(object sender, EventArgs e)
-      {
-         int num = archeryProd[1];
-         if (num <= 0)
-         {
-            return;
-         }
-         IntPtr WindowToFind = FindWindow(null, "Age of Empires IV "); // Window Titel
-         mouseClickBefore(WindowToFind);
-         selectArchery(WindowToFind);
-         for (int i = 0; i < num; i++)
-         {
-            SendMessage(WindowToFind, WM_SYSKEYDOWN, VK_W, 0);
-         }
-         SendMessage(WindowToFind, WM_SYSKEYDOWN, VK_ESCAPE, 0);
-      }
-
-      private void a_e_produce(object sender, EventArgs e)
-      {
-         int num = archeryProd[2];
-         if (num <= 0)
-         {
-            return;
-         }
-         IntPtr WindowToFind = FindWindow(null, "Age of Empires IV "); // Window Titel
-         mouseClickBefore(WindowToFind);
-         selectArchery(WindowToFind);
-         for (int i = 0; i < num; i++)
-         {
-            SendMessage(WindowToFind, WM_SYSKEYDOWN, VK_E, 0);
-         }
-         SendMessage(WindowToFind, WM_SYSKEYDOWN, VK_ESCAPE, 0);
-      }
-
-      private void a_r_produce(object sender, EventArgs e)
-      {
-         int num = archeryProd[3];
-         if (num <= 0)
-         {
-            return;
-         }
-         IntPtr WindowToFind = FindWindow(null, "Age of Empires IV "); // Window Titel
-         mouseClickBefore(WindowToFind);
-         selectArchery(WindowToFind);
-         for (int i = 0; i < num; i++)
-         {
-            SendMessage(WindowToFind, WM_SYSKEYDOWN, VK_R, 0);
-         }
-         SendMessage(WindowToFind, WM_SYSKEYDOWN, VK_ESCAPE, 0);
-      }
-
-
-      private void selectBarracks(IntPtr WindowToFind)
-      {
-         SendMessage(WindowToFind, WM_KEYDOWN, VK_J, 0);
-
-      }
-      private void b_q_produce(object sender, EventArgs e)
-      {
-         int num = barracksProd[0];
-
-         if (num <= 0)
-         {
-            return;
-         }
-         IntPtr WindowToFind = FindWindow(null, "Age of Empires IV "); // Window Titel
-         mouseClickBefore(WindowToFind);
-         selectBarracks(WindowToFind);
-         for (int i = 0; i < num; i++)
-         {
-            SendMessage(WindowToFind, WM_SYSKEYDOWN, VK_Q, 0);
-         }
-         SendMessage(WindowToFind, WM_SYSKEYDOWN, VK_ESCAPE, 0);
-      }
-
-      private void b_w_produce(object sender, EventArgs e)
-      {
-         int num = barracksProd[1];
-         if (num <= 0)
-         {
-            return;
-         }
-         IntPtr WindowToFind = FindWindow(null, "Age of Empires IV "); // Window Titel
-         mouseClickBefore(WindowToFind);
-         selectBarracks(WindowToFind);
-         for (int i = 0; i < num; i++)
-         {
-            SendMessage(WindowToFind, WM_SYSKEYDOWN, VK_W, 0);
-         }
-         SendMessage(WindowToFind, WM_SYSKEYDOWN, VK_ESCAPE, 0);
-      }
-
-      private void b_e_produce(object sender, EventArgs e)
-      {
-         int num = barracksProd[2];
-         if (num <= 0)
-         {
-            return;
-         }
-         IntPtr WindowToFind = FindWindow(null, "Age of Empires IV "); // Window Titel
-         mouseClickBefore(WindowToFind);
-         selectBarracks(WindowToFind);
-         for (int i = 0; i < num; i++)
-         {
-            SendMessage(WindowToFind, WM_SYSKEYDOWN, VK_E, 0);
-         }
-         SendMessage(WindowToFind, WM_SYSKEYDOWN, VK_ESCAPE, 0);
-      }
-
-      private void b_r_produce(object sender, EventArgs e)
-      {
-         int num = barracksProd[3];
-         if (num <= 0)
-         {
-            return;
-         }
-         IntPtr WindowToFind = FindWindow(null, "Age of Empires IV "); // Window Titel
-         mouseClickBefore(WindowToFind);
-         selectBarracks(WindowToFind);
-         for (int i = 0; i < num; i++)
-         {
-            SendMessage(WindowToFind, WM_SYSKEYDOWN, VK_R, 0);
-         }
-         SendMessage(WindowToFind, WM_SYSKEYDOWN, VK_ESCAPE, 0);
-      }
-
-
-      private void a_q_Changed(object sender, EventArgs e)
+      #region 生产数量变更事件处理
+      // 射箭场生产数量变更
+      private void a_q_Changed(object sender, EventArgs e) => UpdateProductionCount(BuildingType.Archery, 0, sender);
+      private void a_w_Changed(object sender, EventArgs e) => UpdateProductionCount(BuildingType.Archery, 1, sender);
+      private void a_e_Changed(object sender, EventArgs e) => UpdateProductionCount(BuildingType.Archery, 2, sender);
+      private void a_r_Changed(object sender, EventArgs e) => UpdateProductionCount(BuildingType.Archery, 3, sender);
+      
+      // 马厩生产数量变更
+      private void s_q_Changed(object sender, EventArgs e) => UpdateProductionCount(BuildingType.Stable, 0, sender);
+      private void s_w_Changed(object sender, EventArgs e) => UpdateProductionCount(BuildingType.Stable, 1, sender);
+      private void s_e_Changed(object sender, EventArgs e) => UpdateProductionCount(BuildingType.Stable, 2, sender);
+      private void s_r_Changed(object sender, EventArgs e) => UpdateProductionCount(BuildingType.Stable, 3, sender);
+      
+      // 兵营生产数量变更
+      private void b_q_Changed(object sender, EventArgs e) => UpdateProductionCount(BuildingType.Barracks, 0, sender);
+      private void b_w_Changed(object sender, EventArgs e) => UpdateProductionCount(BuildingType.Barracks, 1, sender);
+      private void b_e_Changed(object sender, EventArgs e) => UpdateProductionCount(BuildingType.Barracks, 2, sender);
+      private void b_r_Changed(object sender, EventArgs e) => UpdateProductionCount(BuildingType.Barracks, 3, sender);
+      
+      /// <summary>
+      /// 通用的生产数量更新方法
+      /// </summary>
+      private void UpdateProductionCount(BuildingType buildingType, int keyIndex, object sender)
       {
          int num = int.Parse(((AduIntegerUpDown)sender).Text);
-         archeryProd[0] = num;
-         calcFarmerCount();
+         GetProductionArray(buildingType)[keyIndex] = num;
+         CalcFarmerCount();
       }
+      #endregion
 
-      private void a_w_Changed(object sender, EventArgs e)
+
+
+      private void CalcFarmerCount()
       {
-         int num = int.Parse(((AduIntegerUpDown)sender).Text);
-         archeryProd[1] = num;
-         calcFarmerCount();
+         //if (foodFarmer != null)
+         //{
+         //   foodFarmer.Text = Convert.ToDouble(calcFarmerFood()).ToString("0.00");
+
+         //}
+         //if (woodFarmer != null)
+         //{
+         //   woodFarmer.Text = Convert.ToDouble(calcFarmerWood()).ToString("0.00");
+         //}
+         //if (goldFarmer != null)
+         //{
+         //   goldFarmer.Text = Convert.ToDouble(calcFarmerGold()).ToString("0.00");
+         //}
       }
 
-      private void a_e_Changed(object sender, EventArgs e)
-      {
-         int num = int.Parse(((AduIntegerUpDown)sender).Text);
-         archeryProd[2] = num;
-         calcFarmerCount();
-      }
-
-      private void a_r_Changed(object sender, EventArgs e)
-      {
-         int num = int.Parse(((AduIntegerUpDown)sender).Text);
-         archeryProd[3] = num;
-         calcFarmerCount();
-      }
-
-      private void s_q_Changed(object sender, EventArgs e)
-      {
-         int num = int.Parse(((AduIntegerUpDown)sender).Text);
-         stableProd[0] = num;
-         calcFarmerCount();
-      }
-
-      private void s_w_Changed(object sender, EventArgs e)
-      {
-         int num = int.Parse(((AduIntegerUpDown)sender).Text);
-         stableProd[1] = num;
-         calcFarmerCount();
-      }
-
-      private void s_e_Changed(object sender, EventArgs e)
-      {
-         int num = int.Parse(((AduIntegerUpDown)sender).Text);
-         stableProd[2] = num;
-         calcFarmerCount();
-      }
-
-      private void s_r_Changed(object sender, EventArgs e)
-      {
-         int num = int.Parse(((AduIntegerUpDown)sender).Text);
-         stableProd[3] = num;
-         calcFarmerCount();
-      }
-
-      private void b_q_Changed(object sender, EventArgs e)
-      {
-         int num = int.Parse(((AduIntegerUpDown)sender).Text);
-         barracksProd[0] = num;
-         calcFarmerCount();
-      }
-
-      private void b_w_Changed(object sender, EventArgs e)
-      {
-         int num = int.Parse(((AduIntegerUpDown)sender).Text);
-         barracksProd[1] = num;
-         calcFarmerCount();
-      }
-
-      private void b_e_Changed(object sender, EventArgs e)
-      {
-         int num = int.Parse(((AduIntegerUpDown)sender).Text);
-         barracksProd[2] = num;
-         calcFarmerCount();
-      }
-
-      private void b_r_Changed(object sender, EventArgs e)
-      {
-         int num = int.Parse(((AduIntegerUpDown)sender).Text);
-         barracksProd[3] = num;
-         calcFarmerCount();
-      }
-
-      private void calcFarmerCount()
-      {
-         if (foodFarmer != null)
-         {
-            foodFarmer.Text = Convert.ToDouble(calcFarmerFood()).ToString("0.00");
-
-         }
-         if (woodFarmer != null)
-         {
-            woodFarmer.Text = Convert.ToDouble(calcFarmerWood()).ToString("0.00");
-         }
-         if (goldFarmer != null)
-         {
-            goldFarmer.Text = Convert.ToDouble(calcFarmerGold()).ToString("0.00");
-         }
-      }
-
-      private double calcFarmerFood()
+      private double CalcFarmerFood()
       {
          double cost = 0;
          if (tcEnabled)
          {
-            cost += double.Parse(civConfigs[civ].tc.Split(',').Last()) > 0 ? tcNumber * double.Parse(civConfigs[civ].tc.Split(',')[0]) / double.Parse(civConfigs[civ].tc.Split(',').Last()) * 60 : 0;
+            cost += double.Parse(civConfigs[civ].tc.Split(',').Last()) > 0 ? tcNumber * double.Parse(civConfigs[civ].tc.Split(',')[0]) / double.Parse(civConfigs[civ].tc.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
          }
          if (stableEnabled)
          {
-            cost += double.Parse(civConfigs[civ].s_q.Split(',').Last()) > 0 ? stableProd[0] * double.Parse(civConfigs[civ].s_q.Split(',')[0]) / double.Parse(civConfigs[civ].s_q.Split(',').Last()) * 60 : 0;
-            cost += double.Parse(civConfigs[civ].s_w.Split(',').Last()) > 0 ? stableProd[1] * double.Parse(civConfigs[civ].s_w.Split(',')[0]) / double.Parse(civConfigs[civ].s_w.Split(',').Last()) * 60 : 0;
-            cost += double.Parse(civConfigs[civ].s_e.Split(',').Last()) > 0 ? stableProd[2] * double.Parse(civConfigs[civ].s_e.Split(',')[0]) / double.Parse(civConfigs[civ].s_e.Split(',').Last()) * 60 : 0;
-            cost += double.Parse(civConfigs[civ].s_r.Split(',').Last()) > 0 ? stableProd[3] * double.Parse(civConfigs[civ].s_r.Split(',')[0]) / double.Parse(civConfigs[civ].s_r.Split(',').Last()) * 60 : 0;
+            cost += double.Parse(civConfigs[civ].s_q.Split(',').Last()) > 0 ? stableProd[0] * double.Parse(civConfigs[civ].s_q.Split(',')[0]) / double.Parse(civConfigs[civ].s_q.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
+            cost += double.Parse(civConfigs[civ].s_w.Split(',').Last()) > 0 ? stableProd[1] * double.Parse(civConfigs[civ].s_w.Split(',')[0]) / double.Parse(civConfigs[civ].s_w.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
+            cost += double.Parse(civConfigs[civ].s_e.Split(',').Last()) > 0 ? stableProd[2] * double.Parse(civConfigs[civ].s_e.Split(',')[0]) / double.Parse(civConfigs[civ].s_e.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
+            cost += double.Parse(civConfigs[civ].s_r.Split(',').Last()) > 0 ? stableProd[3] * double.Parse(civConfigs[civ].s_r.Split(',')[0]) / double.Parse(civConfigs[civ].s_r.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
          }
          if (archeryEnabled)
          {
-            cost += double.Parse(civConfigs[civ].a_q.Split(',').Last()) > 0 ? archeryProd[0] * double.Parse(civConfigs[civ].a_q.Split(',')[0]) / double.Parse(civConfigs[civ].a_q.Split(',').Last()) * 60 : 0;
-            cost += double.Parse(civConfigs[civ].a_w.Split(',').Last()) > 0 ? archeryProd[1] * double.Parse(civConfigs[civ].a_w.Split(',')[0]) / double.Parse(civConfigs[civ].a_w.Split(',').Last()) * 60 : 0;
-            cost += double.Parse(civConfigs[civ].a_e.Split(',').Last()) > 0 ? archeryProd[2] * double.Parse(civConfigs[civ].a_e.Split(',')[0]) / double.Parse(civConfigs[civ].a_e.Split(',').Last()) * 60 : 0;
-            cost += double.Parse(civConfigs[civ].a_r.Split(',').Last()) > 0 ? archeryProd[3] * double.Parse(civConfigs[civ].a_r.Split(',')[0]) / double.Parse(civConfigs[civ].a_r.Split(',').Last()) * 60 : 0;
+            cost += double.Parse(civConfigs[civ].a_q.Split(',').Last()) > 0 ? archeryProd[0] * double.Parse(civConfigs[civ].a_q.Split(',')[0]) / double.Parse(civConfigs[civ].a_q.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
+            cost += double.Parse(civConfigs[civ].a_w.Split(',').Last()) > 0 ? archeryProd[1] * double.Parse(civConfigs[civ].a_w.Split(',')[0]) / double.Parse(civConfigs[civ].a_w.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
+            cost += double.Parse(civConfigs[civ].a_e.Split(',').Last()) > 0 ? archeryProd[2] * double.Parse(civConfigs[civ].a_e.Split(',')[0]) / double.Parse(civConfigs[civ].a_e.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
+            cost += double.Parse(civConfigs[civ].a_r.Split(',').Last()) > 0 ? archeryProd[3] * double.Parse(civConfigs[civ].a_r.Split(',')[0]) / double.Parse(civConfigs[civ].a_r.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
          }
          if (barracksEnabled)
          {
-            cost += double.Parse(civConfigs[civ].b_q.Split(',').Last()) > 0 ? barracksProd[0] * double.Parse(civConfigs[civ].b_q.Split(',')[0]) / double.Parse(civConfigs[civ].b_q.Split(',').Last()) * 60 : 0;
-            cost += double.Parse(civConfigs[civ].b_w.Split(',').Last()) > 0 ? barracksProd[1] * double.Parse(civConfigs[civ].b_w.Split(',')[0]) / double.Parse(civConfigs[civ].b_w.Split(',').Last()) * 60 : 0;
-            cost += double.Parse(civConfigs[civ].b_e.Split(',').Last()) > 0 ? barracksProd[2] * double.Parse(civConfigs[civ].b_e.Split(',')[0]) / double.Parse(civConfigs[civ].b_e.Split(',').Last()) * 60 : 0;
-            cost += double.Parse(civConfigs[civ].b_r.Split(',').Last()) > 0 ? barracksProd[3] * double.Parse(civConfigs[civ].b_r.Split(',')[0]) / double.Parse(civConfigs[civ].b_r.Split(',').Last()) * 60 : 0;
+            cost += double.Parse(civConfigs[civ].b_q.Split(',').Last()) > 0 ? barracksProd[0] * double.Parse(civConfigs[civ].b_q.Split(',')[0]) / double.Parse(civConfigs[civ].b_q.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
+            cost += double.Parse(civConfigs[civ].b_w.Split(',').Last()) > 0 ? barracksProd[1] * double.Parse(civConfigs[civ].b_w.Split(',')[0]) / double.Parse(civConfigs[civ].b_w.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
+            cost += double.Parse(civConfigs[civ].b_e.Split(',').Last()) > 0 ? barracksProd[2] * double.Parse(civConfigs[civ].b_e.Split(',')[0]) / double.Parse(civConfigs[civ].b_e.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
+            cost += double.Parse(civConfigs[civ].b_r.Split(',').Last()) > 0 ? barracksProd[3] * double.Parse(civConfigs[civ].b_r.Split(',')[0]) / double.Parse(civConfigs[civ].b_r.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
          }
          double pd = double.Parse(civConfigs[civ].food);
          return cost / pd;
       }
 
-      private double calcFarmerWood()
+      private double CalcFarmerWood()
       {
          double cost = 0;
          if (stableEnabled)
          {
-            cost += double.Parse(civConfigs[civ].s_q.Split(',').Last()) > 0 ? stableProd[0] * double.Parse(civConfigs[civ].s_q.Split(',')[1]) / double.Parse(civConfigs[civ].s_q.Split(',').Last()) * 60 : 0;
-            cost += double.Parse(civConfigs[civ].s_w.Split(',').Last()) > 0 ? stableProd[1] * double.Parse(civConfigs[civ].s_w.Split(',')[1]) / double.Parse(civConfigs[civ].s_w.Split(',').Last()) * 60 : 0;
-            cost += double.Parse(civConfigs[civ].s_e.Split(',').Last()) > 0 ? stableProd[2] * double.Parse(civConfigs[civ].s_e.Split(',')[1]) / double.Parse(civConfigs[civ].s_e.Split(',').Last()) * 60 : 0;
-            cost += double.Parse(civConfigs[civ].s_r.Split(',').Last()) > 0 ? stableProd[3] * double.Parse(civConfigs[civ].s_r.Split(',')[1]) / double.Parse(civConfigs[civ].s_r.Split(',').Last()) * 60 : 0;
+            cost += double.Parse(civConfigs[civ].s_q.Split(',').Last()) > 0 ? stableProd[0] * double.Parse(civConfigs[civ].s_q.Split(',')[1]) / double.Parse(civConfigs[civ].s_q.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
+            cost += double.Parse(civConfigs[civ].s_w.Split(',').Last()) > 0 ? stableProd[1] * double.Parse(civConfigs[civ].s_w.Split(',')[1]) / double.Parse(civConfigs[civ].s_w.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
+            cost += double.Parse(civConfigs[civ].s_e.Split(',').Last()) > 0 ? stableProd[2] * double.Parse(civConfigs[civ].s_e.Split(',')[1]) / double.Parse(civConfigs[civ].s_e.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
+            cost += double.Parse(civConfigs[civ].s_r.Split(',').Last()) > 0 ? stableProd[3] * double.Parse(civConfigs[civ].s_r.Split(',')[1]) / double.Parse(civConfigs[civ].s_r.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
          }
          if (archeryEnabled)
          {
-            cost += double.Parse(civConfigs[civ].a_q.Split(',').Last()) > 0 ? archeryProd[0] * double.Parse(civConfigs[civ].a_q.Split(',')[1]) / double.Parse(civConfigs[civ].a_q.Split(',').Last()) * 60 : 0;
-            cost += double.Parse(civConfigs[civ].a_w.Split(',').Last()) > 0 ? archeryProd[1] * double.Parse(civConfigs[civ].a_w.Split(',')[1]) / double.Parse(civConfigs[civ].a_w.Split(',').Last()) * 60 : 0;
-            cost += double.Parse(civConfigs[civ].a_e.Split(',').Last()) > 0 ? archeryProd[2] * double.Parse(civConfigs[civ].a_e.Split(',')[1]) / double.Parse(civConfigs[civ].a_e.Split(',').Last()) * 60 : 0;
-            cost += double.Parse(civConfigs[civ].a_r.Split(',').Last()) > 0 ? archeryProd[3] * double.Parse(civConfigs[civ].a_r.Split(',')[1]) / double.Parse(civConfigs[civ].a_r.Split(',').Last()) * 60 : 0;
+            cost += double.Parse(civConfigs[civ].a_q.Split(',').Last()) > 0 ? archeryProd[0] * double.Parse(civConfigs[civ].a_q.Split(',')[1]) / double.Parse(civConfigs[civ].a_q.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
+            cost += double.Parse(civConfigs[civ].a_w.Split(',').Last()) > 0 ? archeryProd[1] * double.Parse(civConfigs[civ].a_w.Split(',')[1]) / double.Parse(civConfigs[civ].a_w.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
+            cost += double.Parse(civConfigs[civ].a_e.Split(',').Last()) > 0 ? archeryProd[2] * double.Parse(civConfigs[civ].a_e.Split(',')[1]) / double.Parse(civConfigs[civ].a_e.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
+            cost += double.Parse(civConfigs[civ].a_r.Split(',').Last()) > 0 ? archeryProd[3] * double.Parse(civConfigs[civ].a_r.Split(',')[1]) / double.Parse(civConfigs[civ].a_r.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
          }
          if (barracksEnabled)
          {
-            cost += double.Parse(civConfigs[civ].b_q.Split(',').Last()) > 0 ? barracksProd[0] * double.Parse(civConfigs[civ].b_q.Split(',')[1]) / double.Parse(civConfigs[civ].b_q.Split(',').Last()) * 60 : 0;
-            cost += double.Parse(civConfigs[civ].b_w.Split(',').Last()) > 0 ? barracksProd[1] * double.Parse(civConfigs[civ].b_w.Split(',')[1]) / double.Parse(civConfigs[civ].b_w.Split(',').Last()) * 60 : 0;
-            cost += double.Parse(civConfigs[civ].b_e.Split(',').Last()) > 0 ? barracksProd[2] * double.Parse(civConfigs[civ].b_e.Split(',')[1]) / double.Parse(civConfigs[civ].b_e.Split(',').Last()) * 60 : 0;
-            cost += double.Parse(civConfigs[civ].b_r.Split(',').Last()) > 0 ? barracksProd[3] * double.Parse(civConfigs[civ].b_r.Split(',')[1]) / double.Parse(civConfigs[civ].b_r.Split(',').Last()) * 60 : 0;
+            cost += double.Parse(civConfigs[civ].b_q.Split(',').Last()) > 0 ? barracksProd[0] * double.Parse(civConfigs[civ].b_q.Split(',')[1]) / double.Parse(civConfigs[civ].b_q.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
+            cost += double.Parse(civConfigs[civ].b_w.Split(',').Last()) > 0 ? barracksProd[1] * double.Parse(civConfigs[civ].b_w.Split(',')[1]) / double.Parse(civConfigs[civ].b_w.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
+            cost += double.Parse(civConfigs[civ].b_e.Split(',').Last()) > 0 ? barracksProd[2] * double.Parse(civConfigs[civ].b_e.Split(',')[1]) / double.Parse(civConfigs[civ].b_e.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
+            cost += double.Parse(civConfigs[civ].b_r.Split(',').Last()) > 0 ? barracksProd[3] * double.Parse(civConfigs[civ].b_r.Split(',')[1]) / double.Parse(civConfigs[civ].b_r.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
          }
          double pd = double.Parse(civConfigs[civ].wood);
          return cost / pd;
       }
 
-      private double calcFarmerGold()
+      private double CalcFarmerGold()
       {
          double cost = 0;
          if (stableEnabled)
          {
-            cost += double.Parse(civConfigs[civ].s_q.Split(',').Last()) > 0 ? stableProd[0] * double.Parse(civConfigs[civ].s_q.Split(',')[2]) / double.Parse(civConfigs[civ].s_q.Split(',').Last()) * 60 : 0;
-            cost += double.Parse(civConfigs[civ].s_w.Split(',').Last()) > 0 ? stableProd[1] * double.Parse(civConfigs[civ].s_w.Split(',')[2]) / double.Parse(civConfigs[civ].s_w.Split(',').Last()) * 60 : 0;
-            cost += double.Parse(civConfigs[civ].s_e.Split(',').Last()) > 0 ? stableProd[2] * double.Parse(civConfigs[civ].s_e.Split(',')[2]) / double.Parse(civConfigs[civ].s_e.Split(',').Last()) * 60 : 0;
-            cost += double.Parse(civConfigs[civ].s_r.Split(',').Last()) > 0 ? stableProd[3] * double.Parse(civConfigs[civ].s_r.Split(',')[2]) / double.Parse(civConfigs[civ].s_r.Split(',').Last()) * 60 : 0;
+            cost += double.Parse(civConfigs[civ].s_q.Split(',').Last()) > 0 ? stableProd[0] * double.Parse(civConfigs[civ].s_q.Split(',')[2]) / double.Parse(civConfigs[civ].s_q.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
+            cost += double.Parse(civConfigs[civ].s_w.Split(',').Last()) > 0 ? stableProd[1] * double.Parse(civConfigs[civ].s_w.Split(',')[2]) / double.Parse(civConfigs[civ].s_w.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
+            cost += double.Parse(civConfigs[civ].s_e.Split(',').Last()) > 0 ? stableProd[2] * double.Parse(civConfigs[civ].s_e.Split(',')[2]) / double.Parse(civConfigs[civ].s_e.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
+            cost += double.Parse(civConfigs[civ].s_r.Split(',').Last()) > 0 ? stableProd[3] * double.Parse(civConfigs[civ].s_r.Split(',')[2]) / double.Parse(civConfigs[civ].s_r.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
          }
          if (archeryEnabled)
          {
-            cost += double.Parse(civConfigs[civ].a_q.Split(',').Last()) > 0 ? archeryProd[0] * double.Parse(civConfigs[civ].a_q.Split(',')[2]) / double.Parse(civConfigs[civ].a_q.Split(',').Last()) * 60 : 0;
-            cost += double.Parse(civConfigs[civ].a_w.Split(',').Last()) > 0 ? archeryProd[1] * double.Parse(civConfigs[civ].a_w.Split(',')[2]) / double.Parse(civConfigs[civ].a_w.Split(',').Last()) * 60 : 0;
-            cost += double.Parse(civConfigs[civ].a_e.Split(',').Last()) > 0 ? archeryProd[2] * double.Parse(civConfigs[civ].a_e.Split(',')[2]) / double.Parse(civConfigs[civ].a_e.Split(',').Last()) * 60 : 0;
-            cost += double.Parse(civConfigs[civ].a_r.Split(',').Last()) > 0 ? archeryProd[3] * double.Parse(civConfigs[civ].a_r.Split(',')[2]) / double.Parse(civConfigs[civ].a_r.Split(',').Last()) * 60 : 0;
+            cost += double.Parse(civConfigs[civ].a_q.Split(',').Last()) > 0 ? archeryProd[0] * double.Parse(civConfigs[civ].a_q.Split(',')[2]) / double.Parse(civConfigs[civ].a_q.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
+            cost += double.Parse(civConfigs[civ].a_w.Split(',').Last()) > 0 ? archeryProd[1] * double.Parse(civConfigs[civ].a_w.Split(',')[2]) / double.Parse(civConfigs[civ].a_w.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
+            cost += double.Parse(civConfigs[civ].a_e.Split(',').Last()) > 0 ? archeryProd[2] * double.Parse(civConfigs[civ].a_e.Split(',')[2]) / double.Parse(civConfigs[civ].a_e.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
+            cost += double.Parse(civConfigs[civ].a_r.Split(',').Last()) > 0 ? archeryProd[3] * double.Parse(civConfigs[civ].a_r.Split(',')[2]) / double.Parse(civConfigs[civ].a_r.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
          }
          if (barracksEnabled)
          {
-            cost += double.Parse(civConfigs[civ].b_q.Split(',').Last()) > 0 ? barracksProd[0] * double.Parse(civConfigs[civ].b_q.Split(',')[2]) / double.Parse(civConfigs[civ].b_q.Split(',').Last()) * 60 : 0;
-            cost += double.Parse(civConfigs[civ].b_w.Split(',').Last()) > 0 ? barracksProd[1] * double.Parse(civConfigs[civ].b_w.Split(',')[2]) / double.Parse(civConfigs[civ].b_w.Split(',').Last()) * 60 : 0;
-            cost += double.Parse(civConfigs[civ].b_e.Split(',').Last()) > 0 ? barracksProd[2] * double.Parse(civConfigs[civ].b_e.Split(',')[2]) / double.Parse(civConfigs[civ].b_e.Split(',').Last()) * 60 : 0;
-            cost += double.Parse(civConfigs[civ].b_r.Split(',').Last()) > 0 ? barracksProd[3] * double.Parse(civConfigs[civ].b_r.Split(',')[2]) / double.Parse(civConfigs[civ].b_r.Split(',').Last()) * 60 : 0;
+            cost += double.Parse(civConfigs[civ].b_q.Split(',').Last()) > 0 ? barracksProd[0] * double.Parse(civConfigs[civ].b_q.Split(',')[2]) / double.Parse(civConfigs[civ].b_q.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
+            cost += double.Parse(civConfigs[civ].b_w.Split(',').Last()) > 0 ? barracksProd[1] * double.Parse(civConfigs[civ].b_w.Split(',')[2]) / double.Parse(civConfigs[civ].b_w.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
+            cost += double.Parse(civConfigs[civ].b_e.Split(',').Last()) > 0 ? barracksProd[2] * double.Parse(civConfigs[civ].b_e.Split(',')[2]) / double.Parse(civConfigs[civ].b_e.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
+            cost += double.Parse(civConfigs[civ].b_r.Split(',').Last()) > 0 ? barracksProd[3] * double.Parse(civConfigs[civ].b_r.Split(',')[2]) / double.Parse(civConfigs[civ].b_r.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
          }
          double pd = double.Parse(civConfigs[civ].gold);
          return cost / pd;
@@ -897,13 +651,14 @@ namespace Aoe4Helper
       {
          if (((AduSkin.Controls.Metro.MetroSwitch)sender).IsChecked == true)
          {
-            intervalMultiplier *= 0.66;
+            intervalMultiplier *= MA_MULTIPLIER;
          }
          else
          {
-            intervalMultiplier /= 0.66;
+            intervalMultiplier /= MA_MULTIPLIER;
          }
-         updateInterval();
+         UpdateInterval();
       }
    }
 }
+#endregion

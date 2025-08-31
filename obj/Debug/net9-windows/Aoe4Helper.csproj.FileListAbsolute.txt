@@ -1340,3 +1340,4 @@ E:\c# project\AduSkin-master\src\Aoe4Helper\obj\Debug\net9-windows\Aoe4Helper.ge
 E:\c# project\AduSkin-master\src\Aoe4Helper\obj\Debug\net9-windows\ref\Aoe4Helper.dll
 E:\c# project\AduSkin-master\src\Aoe4Helper\obj\Debug\net9-windows\Aoe4Helper.Properties.Resources.resources
 E:\c# project\AduSkin-master\src\Aoe4Helper\obj\Debug\net9-windows\Aoe4Helper.csproj.GenerateResource.cache
+E:\c# project\AduSkin-master\src\Aoe4Helper\obj\Debug\net9-windows\Aoe4Helper.sourcelink.json

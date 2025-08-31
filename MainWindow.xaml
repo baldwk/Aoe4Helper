@@ -6,7 +6,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:AduAttach="clr-namespace:AduSkin.Controls.Attach;assembly=AduSkin"
       Title="WKY.Aoe4Helper" SizeToContent="WidthAndHeight" Topmost="True">
-   <Grid Width="300">
+   <Grid Width="312">
       <Border Style="{StaticResource ShowControlBorder}" Grid.ColumnSpan="2" Margin="10,10,10,10" Padding="0,0,0,0"  Background="Transparent">
          <StackPanel Orientation="Vertical">
             <AduSkin:AduFormLable Title="CIV" Margin="0,0,0,0" HorizontalAlignment="Left">
@@ -75,45 +75,39 @@
                      <Image Source="/Resources/Img/buildings/AoE4_ArcheryRange.webp"  Height="19"/>
                      <AduSkin:MetroSwitch BorderCornerRadius="3" CornerRadius="2" Checked="Archery_Checked" Unchecked="Archery_Checked" Height="23" Margin="3"/>
                      <TextBlock Text="Q" Height="19" Margin="1" FontSize="16"/>
-                     <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="a_q_Changed" Height="19" Width="54" />
+                     <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="a_q_Changed" Height="19" Width="40" />
                      <TextBlock Text="W" Height="19" Margin="1" FontSize="16"/>
-                     <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="a_w_Changed" Height="19" Width="54" />
+                     <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="a_w_Changed" Height="19" Width="40" />
                      <TextBlock Text="E" Height="19" Margin="1" FontSize="16"/>
-                     <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="a_e_Changed" Height="19" Width="54" />
+                     <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="a_e_Changed" Height="19" Width="40" />
+                     <TextBlock Text="R" Height="19" Margin="1" FontSize="16"/>
+                     <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="a_r_Changed" Height="19" Width="40" />
+
                   </WrapPanel>
                   <WrapPanel>
                      <Image Source="Resources/Img/buildings/AoE4_Stable.webp"  Height="19"/>
                      <AduSkin:MetroSwitch BorderCornerRadius="3" CornerRadius="2" Checked="Stable_Checked" Unchecked="Stable_Checked" Height="23" Margin="3"/>
                      <TextBlock Text="Q" Height="19" Margin="1" FontSize="16"/>
-                     <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="s_q_Changed" Height="19" Width="54" />
+                     <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="s_q_Changed" Height="19" Width="40" />
                      <TextBlock Text="W" Height="19" Margin="1" FontSize="16"/>
-                     <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="s_w_Changed" Height="19" Width="54" />
+                     <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="s_w_Changed" Height="19" Width="40" />
                      <TextBlock Text="E" Height="19" Margin="1" FontSize="16"/>
-                     <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="s_e_Changed" Height="19" Width="54" />
+                     <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="s_e_Changed" Height="19" Width="40" />
+                     <TextBlock Text="R" Height="19" Margin="1" FontSize="16"/>
+                     <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="s_r_Changed" Height="19" Width="40" />
                   </WrapPanel>
                   <WrapPanel>
                      <Image Source="Resources/Img/buildings/AoE4_Barracks.webp"  Height="19"/>
                      <AduSkin:MetroSwitch BorderCornerRadius="3" CornerRadius="2" Checked="Barracks_Checked" Unchecked="Barracks_Checked" Height="23" Margin="3"/>
                      <TextBlock Text="Q" Height="19" Margin="1" FontSize="16"/>
-                     <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="b_q_Changed" Height="19" Width="54" />
+                     <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="b_q_Changed" Height="19" Width="40" />
                      <TextBlock Text="W" Height="19" Margin="1" FontSize="16"/>
-                     <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="b_w_Changed" Height="19" Width="54" />
+                     <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="b_w_Changed" Height="19" Width="40" />
                      <TextBlock Text="E" Height="19" Margin="1" FontSize="16"/>
-                     <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="b_e_Changed" Height="19" Width="54" />
+                     <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="b_e_Changed" Height="19" Width="40" />
+                     <TextBlock Text="R" Height="19" Margin="1" FontSize="16"/>
+                     <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="b_r_Changed" Height="19" Width="40" />
                   </WrapPanel>
-               </StackPanel>
-            </AduSkin:AduExpander>
-            <AduSkin:AduExpander Header="Production Calculator" IsEnabled="True" IsExpanded="True" AduAttach:PathDataAttach.PathData="{StaticResource Icon_Controls}" AduAttach:PathDataAttach.Width="14" AduAttach:PathDataAttach.Margin="4,0,10,2">
-
-               <StackPanel Orientation="Horizontal">
-                  <Image Source="/Resources/Img/farmer/food.png" Width="32" Height="32" />
-                  <TextBlock Text="0" Margin="10" x:Name="foodFarmer"/>
-                  <Image Source="/Resources/Img/farmer/wood.png" Width="32" Height="32" />
-                  <TextBlock Text="0" Margin="10" x:Name="woodFarmer"/>
-                  <Image Source="/Resources/Img/farmer/gold.png" Width="32" Height="32" />
-                  <TextBlock Text="0" Margin="10" x:Name="goldFarmer"/>
-                  <Image Source="/Resources/Img/farmer/stone.png" Width="32" Height="32" />
-                  <TextBlock Text="0" Margin="10" x:Name="stoneFarmer"/>
                </StackPanel>
             </AduSkin:AduExpander>
          </StackPanel>
