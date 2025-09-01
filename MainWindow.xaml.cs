@@ -83,7 +83,7 @@ namespace Aoe4Helper
       
       // 键盘事件标志
       private const int KEYEVENTF_KEYUP = 0X2; // 释放按键
-      private const int KEYEVENTF_EXTENDEDKEY = 0X1; 
+      private const int KEYEVENTF_EXTENDEDKEY = 0X1;
       // 数字键常量
       private const int VK_0 = 0x30;
       private const int VK_1 = 0x31;
@@ -453,7 +453,7 @@ namespace Aoe4Helper
          {
             archeryProducer.ForEach(t => t.Stop());
          }
-         
+
          CalcFarmerCount();
       }
 
@@ -658,6 +658,113 @@ namespace Aoe4Helper
             intervalMultiplier /= MA_MULTIPLIER;
          }
          UpdateInterval();
+      }
+
+      /// <summary>
+      /// 重置所有生产数量、开关和MA加速为初始状态
+      /// </summary>
+      private void Reset_Click(object sender, RoutedEventArgs e)
+      {
+         // 重置所有生产数量数组
+         for (int i = 0; i < PRODUCTION_KEYS_COUNT; i++)
+         {
+            stableProd[i] = 0;
+            archeryProd[i] = 0;
+            barracksProd[i] = 0;
+         }
+         
+         // 重置TC村民数量
+         tcNumber = 0;
+         
+         // 关闭所有建筑开关、MA加速并停止定时器
+         ResetAllBuildingSwitches();
+         
+         // 更新UI控件值
+         ResetAllInputControls();
+         
+         // 更新定时器间隔（MA重置后需要重新计算）
+         UpdateInterval();
+         
+         // 重新计算农民数量
+         CalcFarmerCount();
+      }
+      
+      /// <summary>
+      /// 重置所有建筑开关为关闭状态
+      /// </summary>
+      private void ResetAllBuildingSwitches()
+      {
+         // 重置内部状态变量
+         tcEnabled = false;
+         stableEnabled = false;
+         archeryEnabled = false;
+         barracksEnabled = false;
+         
+         // 重置MA加速倍率
+         intervalMultiplier = 1.0;
+         
+         // 停止所有定时器
+         tcProducer?.Stop();
+         stableProducer?.ForEach(timer => timer?.Stop());
+         archeryProducer?.ForEach(timer => timer?.Stop());
+         barracksProducer?.ForEach(timer => timer?.Stop());
+         
+         // 重置UI中的MetroSwitch控件（包括MA开关）
+         ResetMetroSwitchControls(this);
+      }
+      
+      /// <summary>
+      /// 重置所有数字输入控件的值为0
+      /// </summary>
+      private void ResetAllInputControls()
+      {
+         // 遍历控件树找到所有AduIntegerUpDown控件并重置为0
+         ResetIntegerUpDownControls(this);
+      }
+      
+      /// <summary>
+      /// 递归遍历控件树，找到并重置所有MetroSwitch控件为关闭状态
+      /// </summary>
+      private void ResetMetroSwitchControls(DependencyObject parent)
+      {
+         if (parent == null) return;
+         
+         int childCount = System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent);
+         for (int i = 0; i < childCount; i++)
+         {
+            var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
+            
+            if (child is AduSkin.Controls.Metro.MetroSwitch metroSwitch)
+            {
+               // 重置所有MetroSwitch开关，包括TC、建筑开关和MA开关
+               metroSwitch.IsChecked = false;
+            }
+            
+            // 递归处理子控件
+            ResetMetroSwitchControls(child);
+         }
+      }
+      
+      /// <summary>
+      /// 递归遍历控件树，找到并重置所有AduIntegerUpDown控件
+      /// </summary>
+      private void ResetIntegerUpDownControls(DependencyObject parent)
+      {
+         if (parent == null) return;
+         
+         int childCount = System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent);
+         for (int i = 0; i < childCount; i++)
+         {
+            var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
+            
+            if (child is AduSkin.Controls.Metro.AduIntegerUpDown integerUpDown)
+            {
+               integerUpDown.Value = 0;
+            }
+            
+            // 递归处理子控件
+            ResetIntegerUpDownControls(child);
+         }
       }
    }
 }
