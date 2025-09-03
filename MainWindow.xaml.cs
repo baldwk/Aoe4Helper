@@ -10,6 +10,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
@@ -19,6 +21,7 @@ using System.Text.Json;
 using System.Linq;
 using System.Threading;
 using System.Reflection.Metadata;
+using System.Windows.Shapes;
 
 namespace Aoe4Helper
 {
@@ -425,9 +428,9 @@ namespace Aoe4Helper
          {
             SendMessage(gameWindow, WM_SYSKEYDOWN, VK_Q, 0);
          }
-         
+
          SendMessage(gameWindow, WM_SYSKEYDOWN, VK_ESCAPE, 0);
-      }
+         }
       #endregion
 
       #region 建筑开关事件处理
@@ -507,6 +510,121 @@ namespace Aoe4Helper
          }
          
          CalcFarmerCount();
+      }
+      #endregion
+
+      #region 图标点击开关事件
+      private void Archery_Clicked(object sender, MouseButtonEventArgs e)
+      {
+         ToggleBuilding(BuildingType.Archery, !archeryEnabled);
+      }
+
+      private void Stable_Clicked(object sender, MouseButtonEventArgs e)
+      {
+         ToggleBuilding(BuildingType.Stable, !stableEnabled);
+      }
+
+      private void Barracks_Clicked(object sender, MouseButtonEventArgs e)
+      {
+         ToggleBuilding(BuildingType.Barracks, !barracksEnabled);
+      }
+
+      private void ToggleBuilding(BuildingType buildingType, bool enable)
+      {
+         // 切换内部状态
+         switch (buildingType)
+         {
+            case BuildingType.Archery:
+               archeryEnabled = enable;
+               break;
+            case BuildingType.Stable:
+               stableEnabled = enable;
+               break;
+            case BuildingType.Barracks:
+               barracksEnabled = enable;
+               break;
+         }
+
+         // 触发一次生产并启动/停止对应定时器
+         if (enable)
+         {
+            for (int i = 0; i < PRODUCTION_KEYS_COUNT; i++)
+            {
+               var keyValue = new[] { VK_Q, VK_W, VK_E, VK_R }[i];
+               ProduceUnits(buildingType, i, keyValue);
+            }
+
+            GetProducerTimers(buildingType).ForEach(t =>
+            {
+               if (t.Interval.TotalSeconds > 0) t.Start();
+            });
+            StartRing(buildingType);
+         }
+         else
+         {
+            GetProducerTimers(buildingType).ForEach(t => t.Stop());
+            StopRing(buildingType);
+         }
+
+         CalcFarmerCount();
+      }
+
+      private List<DispatcherTimer> GetProducerTimers(BuildingType buildingType)
+      {
+         return buildingType switch
+         {
+            BuildingType.Archery => archeryProducer,
+            BuildingType.Stable => stableProducer,
+            BuildingType.Barracks => barracksProducer,
+            _ => archeryProducer
+         };
+      }
+
+      private void StartRing(BuildingType buildingType)
+      {
+         Shape ring = GetRing(buildingType);
+         if (ring == null) return;
+
+         // 点击反馈：加粗一下边框后恢复
+         var flash = new DoubleAnimation
+         {
+            To = 3.5,
+            Duration = TimeSpan.FromSeconds(0.1),
+            AutoReverse = true
+         };
+         ring.BeginAnimation(Shape.StrokeThicknessProperty, flash);
+
+         // 显示金色虚线边框（段数更少、圆润端点），并让虚线沿边流动
+         ring.Visibility = Visibility.Visible;
+         var dashRun = new DoubleAnimation
+         {
+            From = 0,
+            To = 15, // 与 StrokeDashArray="8 6" 周期匹配
+            Duration = TimeSpan.FromSeconds(1.4),
+            RepeatBehavior = RepeatBehavior.Forever
+         };
+         ring.BeginAnimation(Shape.StrokeDashOffsetProperty, dashRun);
+      }
+
+      private void StopRing(BuildingType buildingType)
+      {
+         Shape ring = GetRing(buildingType);
+         if (ring == null) return;
+         // 取消动画
+         ring.BeginAnimation(Shape.StrokeDashOffsetProperty, null);
+         ring.Visibility = Visibility.Collapsed;
+      }
+
+      private Shape GetRing(BuildingType buildingType)
+      {
+         string name = buildingType switch
+         {
+            BuildingType.Archery => "ArcheryRing",
+            BuildingType.Stable => "StableRing",
+            BuildingType.Barracks => "BarracksRing",
+            _ => ""
+         };
+         return string.IsNullOrEmpty(name) ? null : (Shape)FindName(name);
       }
       #endregion
 
@@ -709,8 +827,11 @@ namespace Aoe4Helper
          archeryProducer?.ForEach(timer => timer?.Stop());
          barracksProducer?.ForEach(timer => timer?.Stop());
          
-         // 重置UI中的MetroSwitch控件（包括MA开关）
+         // 重置开关控件及图标边框
          ResetMetroSwitchControls(this);
+         StopRing(BuildingType.Archery);
+         StopRing(BuildingType.Stable);
+         StopRing(BuildingType.Barracks);
       }
       
       /// <summary>

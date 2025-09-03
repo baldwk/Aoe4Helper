@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Aoe4Helper")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9a6c493ef42c6a3122bf66834c0eb557bd86e98e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+57f44355a707a10cbda50db2993c3cfd4a59da05")]
 [assembly: System.Reflection.AssemblyProductAttribute("Aoe4Helper")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Aoe4Helper")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
