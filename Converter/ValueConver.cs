@@ -20,11 +20,11 @@ namespace AduSkin.Demo.Converter
             double left = 0.0;
 
 
-            UIElement element = value as TreeViewItem;
-            while (element.GetType() != typeof(TreeView))
+            DependencyObject element = value as TreeViewItem;
+            while (element != null && element is not TreeView)
             {
-                element = (UIElement)VisualTreeHelper.GetParent(element);
-                if (element.GetType() == typeof(TreeViewItem))
+                element = VisualTreeHelper.GetParent(element);
+                if (element is TreeViewItem)
                     left += colunwidth;
             }
             return new Thickness(left, 0, 0, 0);
@@ -41,7 +41,8 @@ namespace AduSkin.Demo.Converter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if ((bool)value)
+            if (value is not bool visible) return DependencyProperty.UnsetValue;
+            if (visible)
                 return Visibility.Visible;
             else
                 return Visibility.Collapsed;
@@ -57,7 +58,8 @@ namespace AduSkin.Demo.Converter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if ((Visibility)value == Visibility.Visible)
+            if (value is not Visibility visibility) return DependencyProperty.UnsetValue;
+            if (visibility == Visibility.Visible)
                 return Visibility.Collapsed;
             else
                 return Visibility.Visible;
@@ -74,12 +76,22 @@ namespace AduSkin.Demo.Converter
     {
         public object Convert(object values, Type targetType, object parameter, CultureInfo culture)
         {
-            var calendarDayButton = (CalendarDayButton)values;
-            var dateTime = (DateTime)calendarDayButton.DataContext;
+            if (values is not CalendarDayButton calendarDayButton || calendarDayButton.DataContext is not DateTime dateTime)
+                return DependencyProperty.UnsetValue;
             if (!calendarDayButton.IsMouseOver && !calendarDayButton.IsSelected && !calendarDayButton.IsBlackedOut && (dateTime.DayOfWeek == DayOfWeek.Saturday || dateTime.DayOfWeek == DayOfWeek.Sunday))
-                return new SolidColorBrush(Color.FromArgb(255, 255, 47, 47));
+                return WeekendBrush;
             else
-                return new SolidColorBrush(Color.FromArgb(255, 51, 51, 51));
+                return NormalBrush;
+        }
+
+        private static readonly SolidColorBrush WeekendBrush = CreateBrush(Color.FromRgb(255, 47, 47));
+        private static readonly SolidColorBrush NormalBrush = CreateBrush(Color.FromRgb(51, 51, 51));
+
+        private static SolidColorBrush CreateBrush(Color color)
+        {
+            var brush = new SolidColorBrush(color);
+            brush.Freeze();
+            return brush;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

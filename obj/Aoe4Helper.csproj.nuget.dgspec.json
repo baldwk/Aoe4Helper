@@ -182,7 +182,7 @@
       }
     },
     "E:\\c# project\\AduSkin-master\\src\\Aoe4Helper\\Aoe4Helper.csproj": {
-      "version": "1.0.0",
+      "version": "1.2.0",
       "restore": {
         "projectUniqueName": "E:\\c# project\\AduSkin-master\\src\\Aoe4Helper\\Aoe4Helper.csproj",
         "projectName": "Aoe4Helper",
@@ -226,7 +226,7 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "9.0.200"
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net9.0-windows7.0": {
@@ -276,7 +276,7 @@
               "privateAssets": "none"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.315/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

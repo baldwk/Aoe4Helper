@@ -98,10 +98,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="UserControls\HttpTool.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="UserControls\ImageTool.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -201,7 +197,6 @@
     <Compile Include="Models\DemoModel.cs" />
     <Compile Include="Models\NoticeInfo.cs" />
     <Compile Include="Models\SupportUser.cs" />
-    <Compile Include="Models\Sys_Code.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Servers\ApplicationHostService.cs" />
     <Compile Include="Servers\Contracts\IWindow.cs" />
@@ -226,9 +221,6 @@
     </Compile>
     <Compile Include="UserControls\FormVerificationDemo.xaml.cs">
       <DependentUpon>FormVerificationDemo.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="UserControls\HttpTool.xaml.cs">
-      <DependentUpon>HttpTool.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserControls\ImageTool.xaml.cs">
       <DependentUpon>ImageTool.xaml</DependentUpon>
@@ -283,7 +275,6 @@
     <Compile Include="ViewModel\ModuleViewModel\AduSkinAboutViewModel.cs" />
     <Compile Include="ViewModel\ModuleViewModel\AduSkinSupportViewModel.cs" />
     <Compile Include="ViewModel\ModuleViewModel\PracticalCaseViewModel.cs" />
-    <Compile Include="ViewModel\ToolViewModel\HttpToolViewModel.cs" />
     <Compile Include="Views\AduSkinAbout.xaml.cs">
       <DependentUpon>AduSkinAbout.xaml</DependentUpon>
     </Compile>

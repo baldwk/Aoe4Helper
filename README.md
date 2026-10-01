@@ -1,25 +1,105 @@
-# Age of Empires IV - Auto Unit Production
+# AoE4Helper
 
-This project provides an **auto-production script** for **Age of Empires IV** that helps you continuously train units from your buildings with minimal effort.  
+帝国时代 IV 的自动生产助手，通过游戏现有热键操作城镇中心、射箭场、马厩和兵营。
 
-## ⚔️ Features
-- Automatically produces units from **Archery, Barracks, and Stables**.  
-- Supports **Town Center (TC) villager production**.  
-- Configurable **unit settings for each civilization** via `Prod.tab`.  
+## 使用
 
-## 📖 Usage
-1. In-game, rebind your hotkeys as follows:  
-   - **Archery / Barracks / Stable** → `J / K / L`  
-   - **Town Center (TC)** → `Space`  
-2. Run the script.  
-3. Choose the desired unit amount.  
-4. The script will automatically handle production based on the configuration.  
+1. 在游戏中设置对应热键：
 
-## ⚙️ Configuration
-- Open `Prod.tab`.  
-- Each civilization has its own unit production settings.  
-- You can customize which units will be produced and in what order.
+   | 操作 | 热键 |
+   | --- | --- |
+   | 选择所有城镇中心 | Space |
+   | 选择所有射箭场 | K |
+   | 选择所有兵营 | J |
+   | 选择所有马厩 | L |
+   | 生产槽位 | Q / W / E / R（圣殿骑士团兵营额外使用 T） |
 
-## 📝 Notes
-- Make sure your hotkeys are set exactly as described above, otherwise the script will not work correctly.
-- Designed to reduce repetitive clicking and allow smoother gameplay.
+2. 启动时显示“？”占位旗子，不默认选择文明。选择 CIV 后加载生产间隔与有效槽位，再设置数量和建筑开关。
+3. 游戏或助手在前台时，按 **P** 显示/隐藏助手。长按只切换一次，隐藏后继续生产。
+4. P 唤出面板时保持游戏焦点；点击面板仍可修改数量和文明。其他应用中的 P、Ctrl+P 等组合键保持原用途。
+5. 隐藏时也可从系统托盘显示助手或退出。关闭助手窗口会结束程序。
+
+## 文明与槽位
+
+- 国旗统一使用 52×28 的显示区域，按原图比例缩放，初始占位与选中状态保持一致。
+- 生产数据来自 `Resources/prod.tab`。每项依次为食物、木材、黄金、石料、训练秒数。
+- 某文明的 E/R/T 训练秒数为 0 或未配置时，对应字母和数量框一起隐藏。
+- 切换文明时，隐藏槽位的旧数量清零，相关定时器停止，避免遗留生产请求。
+- 同一文明不同建筑分别判断槽位；有对应配置的建筑仍正常显示。
+- 圣殿骑士团兵营的 T 槽位生产条顿骑士：80 食物、100 黄金，基础训练时间 28 秒；
+  需在游戏中选择条顿骑士团盟友升至帝王时代解锁，MA、数量和采集人数估算沿用现有计算。
+- 构建和发布会将 `Resources/prod.tab` 复制到程序旁，运行时读取该副本。
+
+## 减少操作干扰
+
+- 40 毫秒内的请求按建筑合并，同一建筑的多个生产槽位只选中一次建筑。
+- 没有固定坐标点击；完整按下/释放消息在后台串行发送。
+- 仅手动开启生产时尝试切回游戏，定时任务不会抢其他窗口的焦点。
+- 整批结束固定取消选中，无需设置结束动作；页面不展示该配置或常驻说明。
+- 停止、Reset 或切换文明会取消尚未发送的请求，已按下的键会完成释放。
+- 计时器仅运行有生产数量的有效槽位；数量改为 0 后停止，重新增加数量后从完整训练周期开始计时。
+- 修改正数数量或重新应用相同间隔时保留计时进度；切换文明重新计时，MA 只重算军队周期，Reset 和退出会停止全部计时器。
+
+游戏在后台时可能忽略生产消息；回到游戏后按原周期继续发送，不累计补发。
+按键生产会改变当前选中对象，无法完全隔离手动微操。前台生产已验证，普通匹配和排位尚未实际对局验证。
+
+Lua/SCAR 与 RPC 文件保留为历史实验代码，当前界面只提供按键生产。HTTP 演示工具已移除。
+
+## 采集人数估算
+
+主窗口显示食物、木材、黄金的理论采集人数，保留两位小数。只统计已开启建筑、数量大于零的
+有效生产槽位，数量表示每周期按键次数。数量、文明、建筑开关及 MA 变化后立即刷新；Reset 后归零。
+
+每分钟消耗为各槽位的 `数量 × 单次按键成本 × 60 ÷ 实际生产间隔` 之和，
+采集人数为该资源每分钟消耗除以单人每分钟采集效率。成本与训练间隔统一读取配置，
+军队的实际间隔包含当前 MA 倍率；批次生产沿用配置内的批次成本。
+
+参考 [AoE4 Production Calculator](https://www.aoe4-production-calculator.com/) 的公式，采用固定偏低效率：
+
+| 文明 | 食物/分钟 | 木材/分钟 | 黄金/分钟 |
+| --- | ---: | ---: | ---: |
+| 普通文明 | 32.93 | 31 | 37 |
+| 龙之骑士团 | 40.33925 | 37.665 | 46.065 |
+| 图格鲁克王朝 | 34.5765 | 32.55 | 38.85 |
+
+龙之骑士团在统一低基础值上应用食物 1.225、木材 1.215、黄金 1.245 的修正；
+图格鲁克仅计初始 5% 上缴加成。最终效率写在 `prod.tab` 的 `food/wood/gold` 字段内，
+计算时直接使用，代码不再叠加倍率。无需选择食物来源或科技，不计其他文明的额外收益及被动收入。
+这是持续生产的保守基础估算，未模拟走路、建造、闲置和资源枯竭。
+
+算法与效率参考网站源码快照 [f5471fdd](https://github.com/SichYuriy/aoe4-production-calculator/tree/f5471fdda3e4909309d1585c93e934075aac215d/src)：
+`ProductionCalculatorService`、`BaseGatheringRates`、`DragonOrderModifiers`、`TughlaqDynastyModifiers`。
+
+## 训练时间与 DLC 配置（2026-10-01）
+
+已核对 23 个文明的现有生产槽位，更新 54 处原有训练时间，补齐马其顿王朝、战国大名、
+图格鲁克王朝及金朝的国旗和生产配置。每个配置行的注释标明对应单位。
+基础数据参考 Wiki、AoE4 World，并用本机游戏 16.3.11308.0 的 Attrib.sga 核对差异与新文明槽位。
+单位成本沿用原配置（修正金帐侦察兵单人批次）；采集效率采用上面的保守估算值。
+
+- MA 按参考计算器的 **+33% 生产速度**处理：军队训练时间除以 **1.33**，村民时间不变。
+  例如 22.5 秒变成约 16.917293 秒。生产计时与需求估算使用同一个间隔；反复开关和 Reset 不会累积倍率。
+- 配置采用普通建筑的基础时间，不自动读取时代、科技或光环。蒙古强化军事学院、朱熹区域监察、
+  驻扎和地标加速需按实际情况调整，避免与 MA 重复计算。
+- 法国 TC 默认按黑暗/封建时代 +15% 速度计算，村民为 17.391304 秒；城堡/帝王时代可改为
+  16.666667 / 16 秒。马厩采用普通基础时间，未叠加骑兵学校。
+- 金帐汗国军队和村民按一次双人生产批次计时，数量控件表示按键次数。侦察兵单独生产，间隔 23 秒。
+- 英格兰武士 14.65 秒、蒙古骑手 18 秒、奥斯曼西帕希 31 秒，采用本机版本基础字段，
+  Wiki 部分旧表格尚未同步。
+- 金朝的射箭场一栏对应机械工坊，游戏将其纳入 archery_range 选择分类，继续使用 K。
+  Q/W/E/R 对应床弩、弩手、Eruptor、蜂巢炮；马厩对应骑手、铁浮屠、靺鞨部落兵、侦察兵。
+  TC 的 Q 生产普通村民。战马储备带来的即时生产遵循游戏规则，配置保留正常付费训练时间。
+- 马其顿兵营一栏对应瓦兰吉要塞；野外瓦兰吉营地的自动生产切换不在这些槽位内。
+
+参考资料：
+
+- [军事学院 — Wiki](https://ageofempires.fandom.com/wiki/Military_Academy_%28Age_of_Empires_IV%29)
+- [条顿骑士 — Wiki](https://ageofempires.fandom.com/wiki/Teutonic_Knight_%28Age_of_Empires_IV%29)
+- [武士 — Wiki](https://ageofempires.fandom.com/wiki/Man-at-Arms_%28Age_of_Empires_IV%29)
+- [弩手 — Wiki](https://ageofempires.fandom.com/wiki/Crossbowman_%28Age_of_Empires_IV%29)
+- [法国 — Wiki](https://ageofempires.fandom.com/wiki/French_%28Age_of_Empires_IV%29)
+- [铁浮屠 — Wiki](https://ageofempires.fandom.com/wiki/Iron_Pagoda_%28Age_of_Empires_IV%29)
+- [靺鞨部落兵 — Wiki](https://ageofempires.fandom.com/wiki/Mohe_Tribesman)
+- [机械工坊 — Wiki](https://ageofempires.fandom.com/wiki/Machine_Workshop_%28Age_of_Empires_IV%29)
+- [AoE4 World 数据快照](https://github.com/aoe4world/data/tree/b2cd38222deae40ba2db18171edf494f81410c69)
+- [AoE4 World 国旗](https://aoe4world.com/stats/rm_solo/civilizations)

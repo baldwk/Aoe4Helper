@@ -22,7 +22,7 @@ namespace AduSkin.Demo.UserControls
       [RelayCommand]
       public void ToGroup(ChatUserModel e)
       {
-         SortGroupViewModel vm = this.DataContext as SortGroupViewModel;
+         if (e == null || DataContext is not SortGroupViewModel vm) return;
          vm.IsOpenSortList = false;
          ListBoxContact.UpdateLayout();
          ListBoxContact.AnimateScrollIntoView(e);

@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
     <TargetFrameworks>net9-windows</TargetFrameworks>
+    <Version>1.2.0</Version>
     <GenerateDocumentFile>true</GenerateDocumentFile>
     <UseWpf>true</UseWpf>
     <UseWindowsForms>true</UseWindowsForms>
@@ -23,6 +24,8 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources/**" />
+    <Content Include="Resources\prod.tab" Link="prod.tab" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="Production\Lua\production_bridge.lua" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Compile Remove="Resources\Menu\**" />
     <EmbeddedResource Remove="Resources\Menu\**" />
     <None Remove="Resources\Menu\**" />

@@ -1,324 +1,421 @@
+# food,wood,gold,stone,training_seconds; 0 seconds = unused slot.
+# Base production times, before Military Academy or conditional building bonuses.
+# Reviewed 2026-10-01 against Age of Empires Wiki, AoE4 World and local 16.3.11308.0 game data.
+# See README.md for sources, batch production and civilization-specific notes.
+# food/wood/gold below are effective resources per villager per minute for the conservative estimate.
+# Civilization gathering bonuses are already included in these rates; do not apply them again.
 abbasid_dynasty:
-   tc: 50,0,0,0,20
-   a_q: 30,50,0,0,15
-   a_w: 80,0,40,0,23
-   a_e: 120,0,120,0,35
-   a_r: 170,60,0,0,35
-   s_q: 100,20,0,0,23
-   s_w: 140,0,100,0,35
-   s_e: 130,45,45,0,35
-   s_r: 65,0,0,0,23
-   b_q: 60,20,0,0,15
-   b_w: 120,0,30,0,26
+   tc: 50,0,0,0,20 # villager
+   a_q: 30,50,0,0,15 # archer
+   a_w: 80,0,40,0,22.5 # crossbowman
+   a_e: 120,0,120,0,35 # handcannoneer
+   a_r: 170,60,0,0,35 # camel-archer
+   s_q: 100,20,0,0,22.5 # horseman
+   s_w: 140,0,100,0,35 # lancer
+   s_e: 130,45,45,0,35 # camel-rider
+   s_r: 65,0,0,0,23 # scout
+   b_q: 60,20,0,0,15 # spearman
+   b_w: 120,0,30,0,25 # ghulam
    b_e: 0,0,0,0,0
    b_r: 0,0,0,0,0
-   food: 37
+   food: 32.93
    wood: 31
    gold: 37
    stone: 37
 holy_roman_empire:
-   tc: 50,0,0,0,20
-   a_q: 30,50,0,0,15
-   a_w: 80,0,40,0,23
-   a_e: 120,0,120,0,35
-   a_r: 150,0,150,0,35
-   s_q: 100,20,0,0,23
-   s_w: 140,0,100,0,35
-   s_e: 65,0,0,0,23
+   tc: 50,0,0,0,20 # villager
+   a_q: 30,50,0,0,15 # archer
+   a_w: 80,0,40,0,22.5 # crossbowman
+   a_e: 120,0,120,0,35 # handcannoneer
+   a_r: 150,0,150,0,35 # black-rider
+   s_q: 100,20,0,0,22.5 # horseman
+   s_w: 140,0,100,0,35 # knight
+   s_e: 65,0,0,0,23 # scout
    s_r: 0,0,0,0,0
-   b_q: 60,20,0,0,15
-   b_w: 100,0,20,0,23
-   b_e: 60,0,100,0,23
+   b_q: 60,20,0,0,15 # spearman
+   b_w: 100,0,20,0,20.5 # man-at-arms
+   b_e: 60,0,100,0,20.5 # landsknecht
    b_r: 0,0,0,0,0
-   food: 37
+   food: 32.93
    wood: 31
    gold: 37
    stone: 37
 ayyubids:
-   tc: 50,0,0,0,20
-   a_q: 30,50,0,0,15
-   a_w: 80,0,40,0,23
-   a_e: 120,0,120,0,35
-   a_r: 80,50,50,0,30
-   s_q: 100,20,0,0,23
-   s_w: 130,0,110,0,35
-   s_e: 65,0,0,0,23
-   s_r: 80,50,50,0,30
-   b_q: 60,20,0,0,15
-   b_w: 120,0,30,0,26
+   tc: 50,0,0,0,20 # villager
+   a_q: 30,50,0,0,15 # archer
+   a_w: 80,0,40,0,22.5 # crossbowman
+   a_e: 120,0,120,0,35 # handcannoneer
+   a_r: 80,50,50,0,30 # desert-raider
+   s_q: 100,20,0,0,22.5 # horseman
+   s_w: 130,0,110,0,35 # camel-lancer
+   s_e: 65,0,0,0,23 # scout
+   s_r: 80,50,50,0,30 # desert-raider
+   b_q: 60,20,0,0,15 # spearman
+   b_w: 120,0,30,0,25 # ghulam
    b_e: 0,0,0,0,0
    b_r: 0,0,0,0,0
-   food: 37
+   food: 32.93
    wood: 31
    gold: 37
    stone: 37
 byzantines:
-   tc: 50,0,0,0,20
-   a_q: 30,50,0,0,15
-   a_w: 80,0,40,0,23
-   a_e: 120,0,120,0,35
+   tc: 50,0,0,0,20 # villager
+   a_q: 30,50,0,0,15 # archer
+   a_w: 80,0,40,0,22.5 # crossbowman
+   a_e: 120,0,120,0,35 # handcannoneer
    a_r: 0,0,0,0,0
-   s_q: 100,20,0,0,23
-   s_w: 180,0,150,0,40
-   s_e: 65,0,0,0,23
+   s_q: 100,20,0,0,22.5 # horseman
+   s_w: 180,0,150,0,40 # cataphract
+   s_e: 65,0,0,0,23 # scout
    s_r: 0,0,0,0,0
-   b_q: 80,10,0,0,17
-   b_w: 90,0,40,0,25
+   b_q: 80,10,0,0,17 # limitanei
+   b_w: 90,0,40,0,22.5 # varangian-guard
    b_e: 0,0,0,0,0
    b_r: 0,0,0,0,0
-   food: 37
+   food: 32.93
    wood: 31
    gold: 37
    stone: 37
 chinese:
-   tc: 50,0,0,0,20
-   a_q: 30,50,0,0,15
-   a_w: 80,0,40,0,23
-   a_e: 120,0,120,0,35
-   a_r: 30,30,20,0,15
-   s_q: 100,20,0,0,23
-   s_w: 140,0,100,0,35
-   s_e: 120,20,20,0,23
-   s_r: 65,0,0,0,23
-   b_q: 60,20,0,0,15
-   b_w: 100,0,25,0,23
+   tc: 50,0,0,0,20 # villager
+   a_q: 30,50,0,0,15 # archer
+   a_w: 80,0,40,0,22.5 # crossbowman
+   a_e: 120,0,120,0,35 # handcannoneer
+   a_r: 30,30,20,0,15 # zhuge-nu
+   s_q: 100,20,0,0,22.5 # horseman
+   s_w: 140,0,100,0,35 # lancer
+   s_e: 120,20,20,0,22.5 # fire-lancer
+   s_r: 65,0,0,0,23 # scout
+   b_q: 60,20,0,0,15 # spearman
+   b_w: 100,0,25,0,20.5 # palace-guard
    b_e: 0,0,0,0,0
    b_r: 0,0,0,0,0
-   food: 37
+   food: 32.93
    wood: 31
    gold: 37
    stone: 37
 delhi_sultanate:
-   tc: 50,0,0,0,20
-   a_q: 30,50,0,0,15
-   a_w: 80,0,40,0,23
-   a_e: 120,0,120,0,35
-   a_r: 400,0,600,0,60
-   s_q: 110,30,0,0,25
-   s_w: 140,0,100,0,35
-   s_e: 400,0,350,0,60
-   s_r: 65,0,0,0,23
-   b_q: 60,20,0,0,15
-   b_w: 100,0,20,0,23
+   tc: 50,0,0,0,20 # villager
+   a_q: 30,50,0,0,15 # archer
+   a_w: 80,0,40,0,22.5 # crossbowman
+   a_e: 120,0,120,0,35 # handcannoneer
+   a_r: 400,0,600,0,60 # tower-elephant
+   s_q: 110,30,0,0,25 # ghazi-raider
+   s_w: 140,0,100,0,35 # lancer
+   s_e: 400,0,350,0,60 # war-elephant
+   s_r: 65,0,0,0,23 # scout
+   b_q: 60,20,0,0,15 # spearman
+   b_w: 100,0,20,0,20.5 # man-at-arms
    b_e: 0,0,0,0,0
    b_r: 0,0,0,0,0
-   food: 37
+   food: 32.93
    wood: 31
    gold: 37
    stone: 37
 english:
-   tc: 50,0,0,0,20
-   a_q: 40,50,0,0,15
-   a_w: 80,0,40,0,23
-   a_e: 120,0,120,0,35
+   tc: 50,0,0,0,20 # villager
+   a_q: 40,50,0,0,15 # longbowman
+   a_w: 80,0,40,0,22.5 # crossbowman
+   a_e: 120,0,120,0,35 # handcannoneer
    a_r: 0,0,0,0,0
-   s_q: 100,20,0,0,23
-   s_w: 140,0,100,0,35
+   s_q: 100,20,0,0,22.5 # horseman
+   s_w: 140,0,100,0,35 # knight
    s_e: 0,0,0,0,0
    s_r: 0,0,0,0,0
-   b_q: 60,20,0,0,15
-   b_w: 100,0,20,0,15
+   b_q: 60,20,0,0,15 # spearman
+   b_w: 100,0,20,0,14.65 # man-at-arms
    b_e: 0,0,0,0,0
    b_r: 0,0,0,0,0
-   food: 37
+   food: 32.93
    wood: 31
    gold: 37
    stone: 37
 french:
-   tc: 50,0,0,0,17
-   a_q: 30,50,0,0,15
-   a_w: 80,0,40,0,23
-   a_e: 120,0,120,0,35
+   tc: 50,0,0,0,17.391304 # villager
+   a_q: 30,50,0,0,15 # archer
+   a_w: 80,0,40,0,22.5 # arbaletrier
+   a_e: 120,0,120,0,35 # handcannoneer
    a_r: 0,0,0,0,0
-   s_q: 100,20,0,0,23
-   s_w: 140,0,100,0,29
-   s_e: 65,0,0,0,23
+   s_q: 100,20,0,0,22.5 # horseman
+   s_w: 140,0,100,0,35 # royal-knight
+   s_e: 65,0,0,0,23 # scout
    s_r: 0,0,0,0,0
-   b_q: 60,20,0,0,15
-   b_w: 100,0,20,0,23
+   b_q: 60,20,0,0,15 # spearman
+   b_w: 100,0,20,0,20.5 # man-at-arms
    b_e: 0,0,0,0,0
    b_r: 0,0,0,0,0
-   food: 37
+   food: 32.93
    wood: 31
    gold: 37
    stone: 37
 japanese:
-   tc: 50,0,0,0,20
-   a_q: 25,35,0,0,13
-   a_w: 80,0,60,0,24
-   a_e: 120,0,120,0,35
-   a_r: 100,0,30,0,15
-   s_q: 100,20,0,0,23
-   s_w: 140,0,110,0,35
-   s_e: 65,0,0,0,23
-   s_r: 140,0,110,0,15
-   b_q: 60,20,0,0,15
-   b_w: 100,0,30,0,20
-   b_e: 60,0,20,0,15
-   b_r: 100,0,30,0,15
-   food: 37
+   tc: 50,0,0,0,20 # villager
+   a_q: 25,35,0,0,13 # yumi-ashigaru
+   a_w: 80,0,60,0,24 # onna-musha
+   a_e: 120,0,120,0,35 # handcannon-ashigaru
+   a_r: 100,0,30,0,15 # yumi-bannerman
+   s_q: 100,20,0,0,22.5 # horseman
+   s_w: 140,0,110,0,35 # mounted-samurai
+   s_e: 65,0,0,0,23 # scout
+   s_r: 140,0,110,0,15 # uma-bannerman
+   b_q: 60,20,0,0,15 # spearman
+   b_w: 100,0,30,0,20 # samurai
+   b_e: 60,0,20,0,15 # onna-bugeisha
+   b_r: 100,0,30,0,15 # katana-bannerman
+   food: 32.93
    wood: 31
    gold: 37
    stone: 37
 jeanne_darc:
-   tc: 50,0,0,0,20
-   a_q: 30,50,0,0,15
-   a_w: 80,0,40,0,23
-   a_e: 120,0,120,0,35
+   tc: 50,0,0,0,20 # villager
+   a_q: 30,50,0,0,15 # archer
+   a_w: 80,0,40,0,22.5 # arbaletrier
+   a_e: 120,0,120,0,35 # handcannoneer
    a_r: 0,0,0,0,0
-   s_q: 100,20,0,0,23
-   s_w: 140,0,100,0,35
-   s_e: 65,0,0,0,23
+   s_q: 100,20,0,0,22.5 # horseman
+   s_w: 140,0,100,0,35 # royal-knight
+   s_e: 65,0,0,0,23 # scout
    s_r: 0,0,0,0,0
-   b_q: 60,20,0,0,15
-   b_w: 100,0,20,0,23
+   b_q: 60,20,0,0,15 # spearman
+   b_w: 100,0,20,0,20.5 # man-at-arms
    b_e: 0,0,0,0,0
    b_r: 0,0,0,0,0
-   food: 37
+   food: 32.93
    wood: 31
    gold: 37
    stone: 37
 malians:
-   tc: 50,0,0,0,20
-   a_q: 30,50,0,0,15
-   a_w: 80,0,40,0,23
-   a_e: 110,0,130,0,35
+   tc: 50,0,0,0,20 # villager
+   a_q: 30,50,0,0,15 # archer
+   a_w: 80,0,40,0,22.5 # javelin-thrower
+   a_e: 110,0,130,0,35 # musofadi-gunner
    a_r: 0,0,0,0,0
-   s_q: 120,0,60,0,26
+   s_q: 120,0,60,0,26 # sofa
    s_w: 0,0,0,0,0
-   s_e: 90,0,0,0,14
+   s_e: 90,0,0,0,14 # warrior-scout
    s_r: 0,0,0,0,0
-   b_q: 60,30,0,0,15
-   b_w: 45,0,30,0,15
+   b_q: 60,30,0,0,15 # donso
+   b_w: 45,0,30,0,15 # musofadi-warrior
    b_e: 0,0,0,0,0
    b_r: 0,0,0,0,0
-   food: 37
+   food: 32.93
    wood: 31
    gold: 37
    stone: 37
 mongols:
-   tc: 50,0,0,0,20
-   a_q: 30,50,0,0,15
-   a_w: 80,0,40,0,23
-   a_e: 120,0,120,0,35
-   a_r: 90,0,60,0,28
-   s_q: 100,20,0,0,23
-   s_w: 120,0,80,0,30
-   s_e: 65,0,0,0,23
+   tc: 50,0,0,0,20 # villager
+   a_q: 30,50,0,0,15 # archer
+   a_w: 80,0,40,0,22.5 # crossbowman
+   a_e: 120,0,120,0,35 # handcannoneer
+   a_r: 90,0,60,0,28 # mangudai
+   s_q: 100,20,0,0,18 # horseman
+   s_w: 120,0,80,0,30 # keshik
+   s_e: 65,0,0,0,23 # scout
    s_r: 0,0,0,0,0
-   b_q: 60,20,0,0,15
-   b_w: 100,0,20,0,23
+   b_q: 60,20,0,0,15 # spearman
+   b_w: 100,0,20,0,20.5 # man-at-arms
    b_e: 0,0,0,0,0
    b_r: 0,0,0,0,0
-   food: 37
+   food: 32.93
    wood: 31
    gold: 37
    stone: 37
 order_of_the_dragon:
-   tc: 60,0,0,0,23
-   a_q: 60,100,0,0,18
-   a_w: 160,0,80,0,27
-   a_e: 240,0,240,35
+   tc: 60,0,0,0,23 # gilded-villager
+   a_q: 60,100,0,0,18 # gilded-archer
+   a_w: 160,0,80,0,27 # gilded-crossbowman
+   a_e: 240,0,240,0,35 # gilded-handcannoneer
    a_r: 0,0,0,0,0
-   s_q: 200,40,0,0,27
-   s_w: 280,0,200,0,42
-   s_e: 65,0,0,0,23
+   s_q: 200,40,0,0,27 # gilded-horseman
+   s_w: 280,0,200,0,42 # gilded-knight
+   s_e: 65,0,0,0,23 # scout
    s_r: 0,0,0,0,0
-   b_q: 120,40,0,0,18
-   b_w: 200,0,40,0,27
-   b_e: 120,0,200,0,27
+   b_q: 120,40,0,0,18 # gilded-spearman
+   b_w: 200,0,40,0,25 # gilded-man-at-arms
+   b_e: 120,0,200,0,27 # gilded-landsknecht
    b_r: 0,0,0,0,0
-   food: 45
-   wood: 37
-   gold: 46
+   food: 40.33925
+   wood: 37.665
+   gold: 46.065
    stone: 46
 ottomans:
-   tc: 50,0,0,0,20
-   a_q: 30,50,0,0,15
-   a_w: 80,0,40,0,23
-   a_e: 60,0,100,0,24
-   a_r: 80,80,0,0,24
-   s_q: 120,40,0,0,30
-   s_w: 140,0,100,0,35
-   s_e: 65,0,0,0,23
-   s_r: 100,0,80,0,28
-   b_q: 60,20,0,0,15
-   b_w: 100,0,20,0,23
+   tc: 50,0,0,0,20 # villager
+   a_q: 30,50,0,0,15 # archer
+   a_w: 80,0,40,0,22.5 # crossbowman
+   a_e: 60,0,100,0,24 # janissary
+   a_r: 80,80,0,0,24 # akinji
+   s_q: 120,40,0,0,31 # sipahi
+   s_w: 140,0,100,0,35 # lancer
+   s_e: 65,0,0,0,23 # scout
+   s_r: 100,0,80,0,28 # mehter
+   b_q: 60,20,0,0,15 # spearman
+   b_w: 100,0,20,0,20.5 # man-at-arms
    b_e: 0,0,0,0,0
    b_r: 0,0,0,0,0
-   food: 37
+   food: 32.93
    wood: 31
    gold: 37
    stone: 37
 rus:
-   tc: 50,0,0,0,20
-   a_q: 30,50,0,0,15
-   a_w: 80,0,40,0,23
-   a_e: 90,0,90,0,35
-   a_r: 80,40,0,0,23
-   s_q: 100,20,0,0,23
-   s_w: 140,0,100,0,35
-   s_e: 65,0,0,0,23
+   tc: 50,0,0,0,20 # villager
+   a_q: 30,50,0,0,15 # archer
+   a_w: 80,0,40,0,22.5 # crossbowman
+   a_e: 90,0,90,0,35 # streltsy
+   a_r: 80,40,0,0,22.5 # horse-archer
+   s_q: 100,20,0,0,22.5 # horseman
+   s_w: 140,0,100,0,35 # knight
+   s_e: 65,0,0,0,23 # scout
    s_r: 0,0,0,0,0
-   b_q: 60,20,0,0,15
-   b_w: 100,0,20,0,23
+   b_q: 60,20,0,0,15 # spearman
+   b_w: 100,0,20,0,20.5 # man-at-arms
    b_e: 0,0,0,0,0
    b_r: 0,0,0,0,0
-   food: 37
+   food: 32.93
    wood: 31
    gold: 37
    stone: 37
 zhu_xis_legacy:
-   tc: 50,0,0,0,20
+   tc: 50,0,0,0,20 # villager
    a_q: 0,0,0,0,0
-   a_w: 80,0,40,0,23
-   a_e: 100,60,60,0,30
-   a_r: 30,30,20,0,15
-   s_q: 100,20,0,0,23
-   s_w: 140,0,100,0,35
-   s_e: 80,20,20,0,23
-   s_r: 65,0,0,0,23
-   b_q: 60,20,0,0,15
-   b_w: 100,0,25,0,23
+   a_w: 80,0,40,0,22.5 # crossbowman
+   a_e: 100,60,60,0,30 # grenadier
+   a_r: 30,30,20,0,15 # zhuge-nu
+   s_q: 100,20,0,0,22.5 # horseman
+   s_w: 140,0,100,0,35 # lancer
+   s_e: 80,20,20,0,22.5 # yuan-raider
+   s_r: 65,0,0,0,23 # scout
+   b_q: 60,20,0,0,15 # spearman
+   b_w: 100,0,25,0,20.5 # palace-guard
    b_e: 0,0,0,0,0
    b_r: 0,0,0,0,0
-   food: 37
+   food: 32.93
    wood: 31
    gold: 37
    stone: 37
 knights_templar:
-   tc: 50,0,0,0,20
-   a_q: 30,50,0,0,15
-   a_w: 80,0,40,0,23
-   a_e: 80,0,100,0,26
+   tc: 50,0,0,0,20 # villager
+   a_q: 30,50,0,0,15 # archer
+   a_w: 80,0,40,0,22.5 # crossbowman
+   a_e: 80,0,100,0,26 # genoese-crossbowman
    a_r: 0,0,0,0,0
-   s_q: 100,20,0,0,23
-   s_w: 120,0,140,0,38
-   s_e: 65,0,0,0,23
+   s_q: 100,20,0,0,22.5 # horseman
+   s_w: 120,0,140,0,38 # templar-brother
+   s_e: 65,0,0,0,23 # scout
    s_r: 0,0,0,0,0
-   b_q: 60,20,0,0,15
-   b_w: 100,0,20,0,23
-   b_e: 50,0,60,0,21
+   b_q: 60,20,0,0,15 # spearman
+   b_w: 100,0,20,0,20.5 # man-at-arms
+   b_e: 50,0,60,0,21 # hospitaller-knight
    b_r: 0,0,0,0,0
-   food: 37
+   b_t: 80,0,100,0,28 # teutonic-knight
+   food: 32.93
    wood: 31
    gold: 37
    stone: 37
 lancaster:
-   tc: 50,0,0,0,20
-   a_q: 50,45,0,0,15
-   a_w: 80,0,40,0,23
-   a_e: 120,0,120,0,35
+   tc: 50,0,0,0,20 # villager
+   a_q: 50,45,0,0,15 # yeoman
+   a_w: 80,0,40,0,22.5 # crossbowman
+   a_e: 120,0,120,0,35 # handcannoneer
    a_r: 0,0,0,0,0
-   s_q: 70,0,20,0,15
-   s_w: 140,0,100,0,35
-   s_e: 65,0,0,0,23
+   s_q: 70,0,20,0,15 # hobelar
+   s_w: 140,0,100,0,35 # knight
+   s_e: 65,0,0,0,23 # scout
    s_r: 0,0,0,0,0
-   b_q: 60,20,0,0,15
-   b_w: 100,0,20,0,23
+   b_q: 60,20,0,0,15 # spearman
+   b_w: 100,0,20,0,20.5 # earls-guard
    b_e: 0,0,0,0,0
    b_r: 0,0,0,0,0
-   food: 37
+   food: 32.93
+   wood: 31
+   gold: 37
+   stone: 37
+golden_horde:
+   tc: 100,0,0,0,37 # villager
+   a_q: 60,100,0,0,30 # archer
+   a_w: 160,0,80,0,45 # crossbowman
+   a_e: 240,0,240,0,70 # handcannoneer
+   a_r: 160,140,0,0,48 # kipchak-archer
+   s_q: 200,0,40,0,45 # horseman
+   s_w: 240,0,160,0,60 # keshik
+   s_e: 65,0,0,0,23 # scout (one per batch)
+   s_r: 0,0,0,0,0
+   b_q: 120,40,0,0,30 # spearman
+   b_w: 200,0,40,0,41 # man-at-arms
+   b_e: 100,0,0,0,20 # kharash
+   b_r: 0,0,0,0,0
+   food: 32.93
+   wood: 31
+   gold: 37
+   stone: 37
+macedonian_dynasty:
+   tc: 50,0,0,0,20 # villager
+   a_q: 40,50,0,0,15 # bogmadr
+   a_w: 80,0,40,0,22.5 # crossbowman
+   a_e: 120,0,120,0,35 # handcannoneer
+   a_r: 0,0,0,0,0
+   s_q: 100,20,0,0,22.5 # horseman
+   s_w: 130,0,110,0,35 # riddari
+   s_e: 65,0,0,0,23 # scout
+   s_r: 0,0,0,0,0
+   b_q: 70,20,0,0,17 # atgeirmadr
+   b_w: 80,0,40,0,25 # varangian-guard
+   b_e: 0,0,0,0,0
+   b_r: 0,0,0,0,0
+   food: 32.93
+   wood: 31
+   gold: 37
+   stone: 37
+sengoku_daimyo:
+   tc: 50,0,0,0,20 # villager
+   a_q: 30,35,0,0,13 # yumi-ashigaru
+   a_w: 70,0,70,0,24 # tanegashima-ashigaru
+   a_e: 85,0,155,0,35 # ozutsu
+   a_r: 0,0,0,0,0
+   s_q: 115,30,0,0,22.5 # yari-cavalry
+   s_w: 140,0,110,0,35 # mounted-samurai
+   s_e: 65,0,0,0,23 # scout
+   s_r: 0,0,0,0,0
+   b_q: 60,20,0,0,15 # spearman
+   b_w: 90,0,30,0,20.5 # naginata-samurai
+   b_e: 130,0,30,0,24 # kanabo-samurai
+   b_r: 0,0,0,0,0
+   food: 32.93
+   wood: 31
+   gold: 37
+   stone: 37
+tughlaq_dynasty:
+   tc: 50,0,0,0,20 # villager
+   a_q: 30,50,0,0,15 # archer
+   a_w: 80,0,40,0,22.5 # crossbowman
+   a_e: 120,0,120,0,35 # handcannoneer
+   a_r: 0,0,0,0,0
+   s_q: 180,40,0,0,25 # raider-elephant
+   s_w: 140,0,100,0,35 # lancer
+   s_e: 400,0,350,0,45 # war-elephant
+   s_r: 65,0,0,0,23 # scout
+   b_q: 60,20,0,0,15 # spearman
+   b_w: 90,0,20,0,20.5 # man-at-arms
+   b_e: 0,0,0,0,0
+   b_r: 0,0,0,0,0
+   food: 34.5765
+   wood: 32.55
+   gold: 38.85
+   stone: 37
+jin_dynasty:
+   tc: 50,0,0,0,20 # villager
+   a_q: 0,125,100,0,15 # bed-crossbow
+   a_w: 80,0,40,0,22.5 # crossbowman
+   a_e: 120,0,150,0,40 # eruptor
+   a_r: 0,300,300,0,40 # nest-of-bees
+   s_q: 100,20,0,0,22.5 # horseman
+   s_w: 140,0,125,0,40 # iron-pagoda
+   s_e: 60,35,0,0,17 # mohe-tribesman
+   s_r: 65,0,0,0,23 # scout
+   b_q: 60,20,0,0,15 # spearman
+   b_w: 90,0,20,0,20.5 # man-at-arms
+   b_e: 90,0,80,0,28 # zhanma-swordsman
+   b_r: 0,0,0,0,0
+   food: 32.93
    wood: 31
    gold: 37
    stone: 37

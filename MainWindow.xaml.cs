@@ -1,892 +1,300 @@
 using AduSkin.Controls.Metro;
-using AduSkin.Demo;
 using AduSkin.Demo.ViewModel;
 using Aoe4Helper.Servers.Contracts;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Threading;
-using System.Windows.Media;
 using System.Windows.Media.Animation;
-using YamlDotNet.Serialization.NamingConventions;
+using Shape = System.Windows.Shapes.Shape;
+using System.Windows.Threading;
 using YamlDotNet.Serialization;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using System.IO;
-using System.Reflection;
-using System.Text.Json;
-using System.Linq;
-using System.Threading;
-using System.Reflection.Metadata;
-using System.Windows.Shapes;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace Aoe4Helper
 {
-   public enum BuildingType
-   {
-      Stable,   // 马厩
-      Barracks, // 兵营
-      Archery   // 射箭场
-   }
-   
-   public class CivConfig
-   {
-      public string tc { get; set; }
-      public string a_q { get; set; }
-      public string a_w { get; set; }
-      public string a_e { get; set; }
-      public string a_r { get; set; }
-      public string s_q { get; set; }
-      public string s_w { get; set; }
-      public string s_e { get; set; }
-      public string s_r { get; set; }
-      public string b_q { get; set; }
-      public string b_w { get; set; }
-      public string b_e { get; set; }
-      public string b_r { get; set; }
-      public string food { get; set; }
-      public string wood { get; set; }
-      public string gold { get; set; }
-      public string stone { get; set; }
-   }
+   public enum BuildingType { Stable, Barracks, Archery, TownCenter }
+
    public partial class MainWindow : IWindow
    {
-      #region Win32 API导入
-      [DllImport("user32.dll")]
-      public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+      private const double MilitaryAcademySpeed = 1.33;
+      private readonly Dictionary<BuildingType, BuildingState> buildings = new();
+      private Dictionary<string, CivilizationProductionConfig> civConfigs;
+      private string civ = string.Empty;
+      private double intervalMultiplier = 1;
+      private bool updatingControls = true;
 
-      [DllImport("user32.dll")]
-      public static extern bool PostMessage(IntPtr hWnd, uint Msg, int wParam, int lParam);
-
-      [DllImport("user32.dll")]
-      public static extern int SendMessage(IntPtr hWnd, int wMsg, IntPtr wParam, IntPtr lParam);
-      #endregion
-
-      #region 常量定义
-
-      // 游戏窗口名称
-      private const string GAME_WINDOW_NAME = "Age of Empires IV ";
-      
-      // 窗口消息常量
-      private const int WM_SYSKEYDOWN = 0x0104;
-      private const int WM_SYSKEYUP = 0x0105;
-      private const int WM_CHAR = 0x0102;
-      private const int WM_KEYDOWN = 0x100;
-      private const int WM_KEYUP = 0x0101;
-      private const int WM_LBUTTONDOWN = 0x0201;
-      private const int WM_LBUTTONUP = 0x0202;
-      
-      // 鼠标按键常量
-      private const int VK_LBUTTON = 0X1; // 鼠标左键
-      private const int VK_RBUTTON = 0X2; // 鼠标右键
-      private const int VK_MBUTTON = 0X4; // 鼠标中键
-      
-      // 键盘事件标志
-      private const int KEYEVENTF_KEYUP = 0X2; // 释放按键
-      private const int KEYEVENTF_EXTENDEDKEY = 0X1;
-      // 数字键常量
-      private const int VK_0 = 0x30;
-      private const int VK_1 = 0x31;
-      private const int VK_2 = 0x32;
-      private const int VK_3 = 0x33;
-      private const int VK_4 = 0x34;
-      private const int VK_5 = 0x35;
-      private const int VK_6 = 0x36;
-      private const int VK_7 = 0x37;
-      private const int VK_8 = 0x38;
-      private const int VK_9 = 0x39;
-      // 字母键常量
-      private const int VK_A = 0x41;
-      private const int VK_B = 0x42;
-      private const int VK_C = 0x43;
-      private const int VK_D = 0x44;
-      private const int VK_E = 0x45;
-      private const int VK_F = 0x46;
-      private const int VK_G = 0x47;
-      private const int VK_H = 0x48;
-      private const int VK_I = 0x49;
-      private const int VK_J = 0x4A; // 兵营选择键
-      private const int VK_K = 0x4B; // 射箭场选择键
-      private const int VK_L = 0x4C; // 马厩选择键
-      private const int VK_M = 0x4D;
-      private const int VK_N = 0x4E;
-      private const int VK_O = 0x4F;
-      private const int VK_P = 0x50;
-      private const int VK_Q = 0x51; // 生产键Q
-      private const int VK_R = 0x52; // 生产键R
-      private const int VK_S = 0x53;
-      private const int VK_T = 0x54;
-      private const int VK_U = 0x55;
-      private const int VK_V = 0x56;
-      private const int VK_W = 0x57; // 生产键W
-      private const int VK_X = 0x58;
-      private const int VK_Y = 0x59;
-      private const int VK_Z = 0x5A;
-      // 功能键常量
-      private const int VK_ESCAPE = 0x1B; // ESC键
-      private const int VK_SPACE = 0x20;  // 空格键
-      
-      // 鼠标点击位置常量
-      private const int CLICK_X_BEFORE = 500;
-      private const int CLICK_Y_BEFORE = 800;
-      private const int CLICK_X_AFTER = 1000;
-      private const int CLICK_Y_AFTER = 800;
-      
-      // 游戏相关常量
-      private const double MA_MULTIPLIER = 0.66; // MA加速倍率
-      private const int PRODUCTION_KEYS_COUNT = 4; // 生产按键数量 Q,W,E,R
-      private const string CONFIG_FILE = "./prod.tab";
-      private const string DEFAULT_CIV = "rus";
-      
-      // 时间和计算相关常量
-      private const int TIMER_ADJUSTMENT_MICROSECONDS = -100; // 定时器调整微秒
-      private const int SECONDS_PER_MINUTE = 60; // 每分钟秒数
-      #endregion
-
-      #region 私有字段
-      private DispatcherTimer tcProducer;
-      private List<DispatcherTimer> stableProducer, archeryProducer, barracksProducer;
-      private Dictionary<string, CivConfig> civConfigs;
-      private Random rnd = new Random();
-      private double intervalMultiplier = 1.0;
-
-      private int tcNumber;
-      private int[] stableProd = new int[PRODUCTION_KEYS_COUNT];
-      private int[] archeryProd = new int[PRODUCTION_KEYS_COUNT];
-      private int[] barracksProd = new int[PRODUCTION_KEYS_COUNT];
-
-      private bool tcEnabled = false;
-      private bool stableEnabled = false; 
-      private bool archeryEnabled = false;
-      private bool barracksEnabled = false;
-      private string civ = DEFAULT_CIV;
-      #endregion
-
-      #region 构造函数和初始化
       public MainWindow(MainViewModel viewModel)
       {
          LoadCivConfig();
-         InitializeComponent();
-         this.DataContext = viewModel;
-         this.Closed += delegate { Application.Current.Shutdown(); };
-         InitTimer();
-      }
-      #endregion
-
-      #region 配置加载
-      private void LoadCivConfig()
-      {
-         var serializer = new SerializerBuilder().WithNamingConvention(CamelCaseNamingConvention.Instance).Build();
-         var deserializer = new DeserializerBuilder().WithNamingConvention(UnderscoredNamingConvention.Instance).Build();
-
-         var ymlFile = CONFIG_FILE;
-         if (File.Exists(ymlFile))
+         foreach (BuildingType type in Enum.GetValues<BuildingType>())
          {
-            var ymlContent = File.ReadAllText(ymlFile); // 读取 yaml 文件内容
-            civConfigs = deserializer.Deserialize<Dictionary<string, CivConfig>>(ymlContent); // 序列化
-            if (civConfigs == null)
+            var state = new BuildingState(type switch
             {
-               throw new Exception("Failed to load civ configs.");
+               BuildingType.TownCenter => 1,
+               BuildingType.Barracks => 5,
+               _ => 4
+            });
+            buildings.Add(type, state);
+            for (int i = 0; i < state.Timers.Length; i++)
+            {
+               int slot = i;
+               state.Timers[i].Tick += async (_, _) => await ProduceUnitsAsync(type, slot);
             }
          }
-      }
-      #endregion
-
-      #region 定时器初始化
-      private void InitTimer()
-      {
-         // 初始化TC生产器
-         tcProducer = new DispatcherTimer
+         InitializeComponent();
+         DataContext = viewModel;
+         buildings[BuildingType.Archery].Ring = ArcheryRing;
+         buildings[BuildingType.Stable].Ring = StableRing;
+         buildings[BuildingType.Barracks].Ring = BarracksRing;
+         updatingControls = false;
+         UpdateInterval();
+         Closed += (_, _) =>
          {
-            Interval = TimeSpan.FromSeconds(0)
-         };
-         tcProducer.Tick += (s, e) => TcProduce();
-
-         // 初始化马厩生产器
-         stableProducer = CreateProducerTimers();
-         stableProducer[0].Tick += (s, e) => ProduceUnits(BuildingType.Stable, 0, VK_Q);
-         stableProducer[1].Tick += (s, e) => ProduceUnits(BuildingType.Stable, 1, VK_W);
-         stableProducer[2].Tick += (s, e) => ProduceUnits(BuildingType.Stable, 2, VK_E);
-         stableProducer[3].Tick += (s, e) => ProduceUnits(BuildingType.Stable, 3, VK_R);
-         
-         // 初始化兵营生产器  
-         barracksProducer = CreateProducerTimers();
-         barracksProducer[0].Tick += (s, e) => ProduceUnits(BuildingType.Barracks, 0, VK_Q);
-         barracksProducer[1].Tick += (s, e) => ProduceUnits(BuildingType.Barracks, 1, VK_W);
-         barracksProducer[2].Tick += (s, e) => ProduceUnits(BuildingType.Barracks, 2, VK_E);
-         barracksProducer[3].Tick += (s, e) => ProduceUnits(BuildingType.Barracks, 3, VK_R);
-
-         // 初始化射箭场生产器
-         archeryProducer = CreateProducerTimers();
-         archeryProducer[0].Tick += (s, e) => ProduceUnits(BuildingType.Archery, 0, VK_Q);
-         archeryProducer[1].Tick += (s, e) => ProduceUnits(BuildingType.Archery, 1, VK_W);
-         archeryProducer[2].Tick += (s, e) => ProduceUnits(BuildingType.Archery, 2, VK_E);
-         archeryProducer[3].Tick += (s, e) => ProduceUnits(BuildingType.Archery, 3, VK_R);
-      }
-      
-      private List<DispatcherTimer> CreateProducerTimers()
-      {
-         var timers = new List<DispatcherTimer>();
-         for (int i = 0; i < PRODUCTION_KEYS_COUNT; i++)
-         {
-            timers.Add(new DispatcherTimer { Interval = TimeSpan.FromSeconds(0) });
-         }
-         return timers;
-      }
-      #endregion
-
-      #region 通用工具方法
-      /// <summary>
-      /// 通用的单位生产方法
-      /// </summary>
-      /// <param name="buildingType">建筑类型</param>
-      /// <param name="keyIndex">按键索引 (0=Q, 1=W, 2=E, 3=R)</param>
-      /// <param name="productionKey">生产按键</param>
-      private void ProduceUnits(BuildingType buildingType, int keyIndex, int productionKey)
-      {
-         var productionArray = GetProductionArray(buildingType);
-         int num = productionArray[keyIndex];
-         
-         if (num <= 0) return;
-         
-         IntPtr gameWindow = FindWindow(null, GAME_WINDOW_NAME);
-         MouseClickBefore(gameWindow);
-         SelectBuilding(gameWindow, buildingType);
-         
-         for (int i = 0; i < num; i++)
-         {
-            SendMessage(gameWindow, WM_SYSKEYDOWN, productionKey, 0);
-         }
-         
-         SendMessage(gameWindow, WM_SYSKEYDOWN, VK_ESCAPE, 0);
-      }
-      
-      /// <summary>
-      /// 根据建筑类型获取对应的生产数组
-      /// </summary>
-      private int[] GetProductionArray(BuildingType buildingType)
-      {
-         return buildingType switch
-         {
-            BuildingType.Stable => stableProd,
-            BuildingType.Barracks => barracksProd,
-            BuildingType.Archery => archeryProd,
-            _ => throw new ArgumentException($"不支持的建筑类型: {buildingType}")
+            StopProducerTimers();
+            CancelProductionRequests();
+            productionCancellation.Dispose();
+            Application.Current.Shutdown();
          };
       }
-      
-      /// <summary>
-      /// 选择指定的建筑
-      /// </summary>
-      private void SelectBuilding(IntPtr gameWindow, BuildingType buildingType)
+
+      private void LoadCivConfig()
       {
-         int selectionKey = buildingType switch
-         {
-            BuildingType.Stable => VK_L,
-            BuildingType.Barracks => VK_J,
-            BuildingType.Archery => VK_K,
-            _ => throw new ArgumentException($"不支持的建筑类型: {buildingType}")
-         };
-         
-         SendMessage(gameWindow, WM_KEYDOWN, selectionKey, buildingType == BuildingType.Stable ? 0x20000000 : 0);
+         string path = Path.Combine(AppContext.BaseDirectory, "prod.tab");
+         var deserializer = new DeserializerBuilder()
+            .WithNamingConvention(UnderscoredNamingConvention.Instance).Build();
+         var configs = deserializer.Deserialize<Dictionary<string, CivConfig>>(File.ReadAllText(path))
+            ?? throw new InvalidDataException("prod.tab 中没有文明配置。");
+         civConfigs = configs.ToDictionary(pair => pair.Key, pair => pair.Value.Parse(pair.Key));
       }
-      #endregion
-      
-      #region 时间间隔更新
-      private void UpdateInterval()
+
+      private CivilizationProductionConfig CurrentConfig =>
+         civConfigs.TryGetValue(civ, out var config) ? config : null;
+
+      private Task ProduceUnitsAsync(BuildingType type, int slot, bool activateGame = false)
       {
-         CivConfig config = civConfigs[civ];
-         TimeSpan diff = TimeSpan.FromMicroseconds(TIMER_ADJUSTMENT_MICROSECONDS);
-         tcProducer.Interval = TimeSpan.FromSeconds(int.Parse(config.tc.Split(',').Last()));
-         int s_q_interval = (int)(int.Parse(config.s_q.Split(',').Last()) * intervalMultiplier);
-         if (s_q_interval > 0)
+         var state = buildings[type];
+         return state.Enabled && state.Quantities[slot] > 0 && state.Timers[slot].Interval > TimeSpan.Zero
+            ? ProduceWithKeyboardAsync(type.ToString(), slot, state.Quantities[slot], activateGame)
+            : Task.CompletedTask;
+      }
+
+      private void UpdateInterval(bool restart = false)
+      {
+         if (updatingControls) return;
+         var config = CurrentConfig;
+         updatingControls = true;
+         try { UpdateProductionSlotVisibility(config); }
+         finally { updatingControls = false; }
+         foreach (var (type, state) in buildings)
          {
-            stableProducer[0].Interval = TimeSpan.FromSeconds(s_q_interval).Add(diff);
+            for (int i = 0; i < state.Timers.Length; i++)
+            {
+               double seconds = config?.Slots[type][i].TrainingSeconds ?? 0;
+               if (type != BuildingType.TownCenter) seconds *= intervalMultiplier;
+               var interval = TimeSpan.FromSeconds(seconds);
+               var timer = state.Timers[i];
+               if (restart || timer.Interval != interval)
+               {
+                  timer.Stop();
+                  timer.Interval = interval;
+               }
+            }
+            UpdateTimerState(state);
          }
-         int s_w_interval = (int)(int.Parse(config.s_w.Split(',').Last()) * intervalMultiplier);
-         if (s_w_interval > 0)
+         CalcFarmerCount();
+      }
+
+      private static void UpdateTimerState(BuildingState state)
+      {
+         for (int i = 0; i < state.Timers.Length; i++)
          {
-            stableProducer[1].Interval = TimeSpan.FromSeconds(s_w_interval).Add(diff);
+            var timer = state.Timers[i];
+            bool shouldRun = state.Enabled && state.Quantities[i] > 0 && timer.Interval > TimeSpan.Zero;
+            if (timer.IsEnabled == shouldRun) continue;
+            if (shouldRun) timer.Start();
+            else timer.Stop();
          }
-         int s_e_interval = (int)(int.Parse(config.s_e.Split(',').Last()) * intervalMultiplier);
-         if (s_e_interval > 0)
-         {
-            stableProducer[2].Interval = TimeSpan.FromSeconds(s_e_interval).Add(diff);
-         }
-         int s_r_interval = (int)(int.Parse(config.s_r.Split(',').Last()) * intervalMultiplier);
-         if (s_r_interval > 0)
-         {
-            stableProducer[3].Interval = TimeSpan.FromSeconds(s_r_interval).Add(diff);
-         }
-         int a_q_interval = (int)(int.Parse(config.a_q.Split(',').Last()) * intervalMultiplier);
-         if (a_q_interval > 0)
-         {
-            archeryProducer[0].Interval = TimeSpan.FromSeconds(a_q_interval).Add(diff);
-         }
-         int a_w_interval = (int)(int.Parse(config.a_w.Split(',').Last()) * intervalMultiplier);
-         if (a_w_interval > 0)
-         {
-            archeryProducer[1].Interval = TimeSpan.FromSeconds(a_w_interval).Add(diff);
-         }
-         int a_e_interval = (int)(int.Parse(config.a_e.Split(',').Last()) * intervalMultiplier);
-         if (a_e_interval > 0)
-         {
-            archeryProducer[2].Interval = TimeSpan.FromSeconds(a_e_interval).Add(diff);
-         }
-         int a_r_interval = (int)(int.Parse(config.a_r.Split(',').Last()) * intervalMultiplier);
-         if (a_r_interval > 0)
-         {
-            archeryProducer[3].Interval = TimeSpan.FromSeconds(a_r_interval).Add(diff);
-         }
-         int b_q_interval = (int)(int.Parse(config.b_q.Split(',').Last()) * intervalMultiplier);
-         if (b_q_interval > 0)
-         {
-            barracksProducer[0].Interval = TimeSpan.FromSeconds(b_q_interval).Add(diff);
-         }
-         int b_w_interval = (int)(int.Parse(config.b_w.Split(',').Last()) * intervalMultiplier);
-         if (b_w_interval > 0)
-         {
-            barracksProducer[1].Interval = TimeSpan.FromSeconds(b_w_interval).Add(diff);
-         }
-         int b_e_interval = (int)(int.Parse(config.b_e.Split(',').Last()) * intervalMultiplier);
-         if (b_e_interval > 0)
-         {
-            barracksProducer[2].Interval = TimeSpan.FromSeconds(b_e_interval).Add(diff);
-         }
-         int b_r_interval = (int)(int.Parse(config.b_r.Split(',').Last()) * intervalMultiplier);
-         if (b_r_interval > 0)
-         {
-            barracksProducer[3].Interval = TimeSpan.FromSeconds(b_r_interval).Add(diff);
-         }
+      }
+
+      private void StopProducerTimers()
+      {
+         foreach (var timer in buildings.Values.SelectMany(state => state.Timers)) timer.Stop();
       }
 
       private void Civ_Changed(object sender, SelectionChangedEventArgs e)
       {
-         ComboBoxItem cbx = ((sender as AduComboBox).SelectedItem as ComboBoxItem);
-         civ = cbx.Name;
-         UpdateInterval();
+         string selected = ((AduComboBox)sender).SelectedItem is ComboBoxItem item ? item.Name : string.Empty;
+         if (selected == civ) return;
+         CancelProductionRequests();
+         civ = selected;
+         UpdateInterval(restart: true);
+         if (civ.Length > 0 && CurrentConfig == null) ShowProductionError("找不到所选文明的生产配置。");
+      }
+
+      private async void Tc_Checked(object sender, RoutedEventArgs e) =>
+         await SetBuildingEnabledAsync(BuildingType.TownCenter, ((MetroSwitch)sender).IsChecked == true);
+
+      private async void Archery_Clicked(object sender, MouseButtonEventArgs e) =>
+         await SetBuildingEnabledAsync(BuildingType.Archery, !buildings[BuildingType.Archery].Enabled);
+
+      private async void Stable_Clicked(object sender, MouseButtonEventArgs e) =>
+         await SetBuildingEnabledAsync(BuildingType.Stable, !buildings[BuildingType.Stable].Enabled);
+
+      private async void Barracks_Clicked(object sender, MouseButtonEventArgs e) =>
+         await SetBuildingEnabledAsync(BuildingType.Barracks, !buildings[BuildingType.Barracks].Enabled);
+
+      private async Task SetBuildingEnabledAsync(BuildingType type, bool enabled)
+      {
+         var state = buildings[type];
+         if (updatingControls || state.Enabled == enabled) return;
+         CancelProductionRequests(type.ToString());
+         state.Enabled = enabled;
+         UpdateRing(state);
+         UpdateTimerState(state);
          CalcFarmerCount();
-      }
-
-
-      private void tcNumChanged(object sender, TextChangedEventArgs e)
-      {
-         tcNumber = int.Parse(((AduIntegerUpDown)sender).Text);
-      }
-
-      private void Tc_Checked(object sender, RoutedEventArgs e)
-      {
-         if (((AduSkin.Controls.Metro.MetroSwitch)sender).IsChecked == true)
+         if (enabled)
          {
-            tcEnabled = true;
-            TcProduce();
-            if (tcProducer.Interval.TotalSeconds > 0)
-            {
-               tcProducer.Start();
-            }
+            // 同一轮的槽位一起入队，由按键客户端合并建筑选择操作。
+            await Task.WhenAll(Enumerable.Range(0, state.Quantities.Length)
+               .Select(slot => ProduceUnitsAsync(type, slot, activateGame: true)));
          }
-         else
-         {
-            tcEnabled = false;
-            tcProducer.Stop();
-         }
-         CalcFarmerCount();
       }
 
-      #region 鼠标操作方法
-      private int MAKELPARAM(int p, int p_2)
+      private static void UpdateRing(BuildingState state)
       {
-         return ((p_2 << 16) | (p & 0xFFFF));
-      }
-
-      private void MouseClickAfter(IntPtr window)
-      {
-         PostMessage(window, WM_LBUTTONDOWN, 0, MAKELPARAM(CLICK_X_AFTER, CLICK_Y_AFTER));
-         PostMessage(window, WM_LBUTTONUP, 0, MAKELPARAM(CLICK_X_AFTER, CLICK_Y_AFTER));
-      }
-
-      private void MouseClickBefore(IntPtr window)
-      {
-         SendMessage(window, WM_LBUTTONDOWN, 0, MAKELPARAM(CLICK_X_BEFORE, CLICK_Y_BEFORE));
-         SendMessage(window, WM_LBUTTONUP, 0, MAKELPARAM(CLICK_X_BEFORE, CLICK_Y_BEFORE));
-      }
-      #endregion
-
-      #region TC生产方法
-      private void TcProduce()
-      {
-         if (tcNumber <= 0) return;
-         
-         IntPtr gameWindow = FindWindow(null, GAME_WINDOW_NAME);
-         MouseClickBefore(gameWindow);
-         SendMessage(gameWindow, WM_SYSKEYDOWN, VK_SPACE, 0);
-
-         for (int i = 0; i < tcNumber; i++)
-         {
-            SendMessage(gameWindow, WM_SYSKEYDOWN, VK_Q, 0);
-         }
-
-         SendMessage(gameWindow, WM_SYSKEYDOWN, VK_ESCAPE, 0);
-         }
-      #endregion
-
-      #region 建筑开关事件处理
-      private void Archery_Checked(object sender, RoutedEventArgs e)
-      {
-         archeryEnabled = ((AduSkin.Controls.Metro.MetroSwitch)sender).IsChecked == true;
-         
-         if (archeryEnabled)
-         {
-            // 立即执行一次生产
-            for (int i = 0; i < PRODUCTION_KEYS_COUNT; i++)
-            {
-               var keyValue = new[] { VK_Q, VK_W, VK_E, VK_R }[i];
-               ProduceUnits(BuildingType.Archery, i, keyValue);
-            }
-
-            archeryProducer.ForEach(t =>
-            {
-               if (t.Interval.TotalSeconds > 0) t.Start();
-            });
-         }
-         else
-         {
-            archeryProducer.ForEach(t => t.Stop());
-         }
-
-         CalcFarmerCount();
-      }
-
-      private void Barracks_Checked(object sender, RoutedEventArgs e)
-      {
-         barracksEnabled = ((AduSkin.Controls.Metro.MetroSwitch)sender).IsChecked == true;
-         
-         if (barracksEnabled)
-         {
-            // 立即执行一次生产
-            for (int i = 0; i < PRODUCTION_KEYS_COUNT; i++)
-            {
-               var keyValue = new[] { VK_Q, VK_W, VK_E, VK_R }[i];
-               ProduceUnits(BuildingType.Barracks, i, keyValue);
-            }
-
-            barracksProducer.ForEach(t =>
-            {
-               if (t.Interval.TotalSeconds > 0) t.Start();
-            });
-         }
-         else
-         {
-            barracksProducer.ForEach(t => t.Stop());
-         }
-         
-         CalcFarmerCount();
-      }
-
-      private void Stable_Checked(object sender, RoutedEventArgs e)
-      {
-         stableEnabled = ((AduSkin.Controls.Metro.MetroSwitch)sender).IsChecked == true;
-         
-         if (stableEnabled)
-         {
-            // 立即执行一次生产
-            for (int i = 0; i < PRODUCTION_KEYS_COUNT; i++)
-            {
-               var keyValue = new[] { VK_Q, VK_W, VK_E, VK_R }[i];
-               ProduceUnits(BuildingType.Stable, i, keyValue);
-            }
-
-            stableProducer.ForEach(t =>
-            {
-               if (t.Interval.TotalSeconds > 0) t.Start();
-            });
-         }
-         else
-         {
-            stableProducer.ForEach(t => t.Stop());
-         }
-         
-         CalcFarmerCount();
-      }
-      #endregion
-
-      #region 图标点击开关事件
-      private void Archery_Clicked(object sender, MouseButtonEventArgs e)
-      {
-         ToggleBuilding(BuildingType.Archery, !archeryEnabled);
-      }
-
-      private void Stable_Clicked(object sender, MouseButtonEventArgs e)
-      {
-         ToggleBuilding(BuildingType.Stable, !stableEnabled);
-      }
-
-      private void Barracks_Clicked(object sender, MouseButtonEventArgs e)
-      {
-         ToggleBuilding(BuildingType.Barracks, !barracksEnabled);
-      }
-
-      private void ToggleBuilding(BuildingType buildingType, bool enable)
-      {
-         // 切换内部状态
-         switch (buildingType)
-         {
-            case BuildingType.Archery:
-               archeryEnabled = enable;
-               break;
-            case BuildingType.Stable:
-               stableEnabled = enable;
-               break;
-            case BuildingType.Barracks:
-               barracksEnabled = enable;
-               break;
-         }
-
-         // 触发一次生产并启动/停止对应定时器
-         if (enable)
-         {
-            for (int i = 0; i < PRODUCTION_KEYS_COUNT; i++)
-            {
-               var keyValue = new[] { VK_Q, VK_W, VK_E, VK_R }[i];
-               ProduceUnits(buildingType, i, keyValue);
-            }
-
-            GetProducerTimers(buildingType).ForEach(t =>
-            {
-               if (t.Interval.TotalSeconds > 0) t.Start();
-            });
-            StartRing(buildingType);
-         }
-         else
-         {
-            GetProducerTimers(buildingType).ForEach(t => t.Stop());
-            StopRing(buildingType);
-         }
-
-         CalcFarmerCount();
-      }
-
-      private List<DispatcherTimer> GetProducerTimers(BuildingType buildingType)
-      {
-         return buildingType switch
-         {
-            BuildingType.Archery => archeryProducer,
-            BuildingType.Stable => stableProducer,
-            BuildingType.Barracks => barracksProducer,
-            _ => archeryProducer
-         };
-      }
-
-      private void StartRing(BuildingType buildingType)
-      {
-         Shape ring = GetRing(buildingType);
+         Shape ring = state.Ring;
          if (ring == null) return;
-
-         // 点击反馈：加粗一下边框后恢复
-         var flash = new DoubleAnimation
+         if (!state.Enabled)
          {
-            To = 3.5,
-            Duration = TimeSpan.FromSeconds(0.1),
-            AutoReverse = true
-         };
-         ring.BeginAnimation(Shape.StrokeThicknessProperty, flash);
-
-         // 显示金色虚线边框（段数更少、圆润端点），并让虚线沿边流动
+            ring.BeginAnimation(Shape.StrokeDashOffsetProperty, null);
+            ring.BeginAnimation(Shape.StrokeThicknessProperty, null);
+            ring.Visibility = Visibility.Collapsed;
+            return;
+         }
          ring.Visibility = Visibility.Visible;
-         var dashRun = new DoubleAnimation
+         ring.BeginAnimation(Shape.StrokeThicknessProperty, new DoubleAnimation
          {
-            From = 0,
-            To = 15, // 与 StrokeDashArray="8 6" 周期匹配
-            Duration = TimeSpan.FromSeconds(1.4),
-            RepeatBehavior = RepeatBehavior.Forever
-         };
-         ring.BeginAnimation(Shape.StrokeDashOffsetProperty, dashRun);
-      }
-
-      private void StopRing(BuildingType buildingType)
-      {
-         Shape ring = GetRing(buildingType);
-         if (ring == null) return;
-         // 取消动画
-         ring.BeginAnimation(Shape.StrokeDashOffsetProperty, null);
-         ring.Visibility = Visibility.Collapsed;
-      }
-
-      private Shape GetRing(BuildingType buildingType)
-      {
-         string name = buildingType switch
+            To = 3.5, Duration = TimeSpan.FromSeconds(0.1), AutoReverse = true,
+            FillBehavior = FillBehavior.Stop
+         });
+         ring.BeginAnimation(Shape.StrokeDashOffsetProperty, new DoubleAnimation
          {
-            BuildingType.Archery => "ArcheryRing",
-            BuildingType.Stable => "StableRing",
-            BuildingType.Barracks => "BarracksRing",
-            _ => ""
-         };
-         return string.IsNullOrEmpty(name) ? null : (Shape)FindName(name);
+            From = 0, To = 15, Duration = TimeSpan.FromSeconds(1.4), RepeatBehavior = RepeatBehavior.Forever
+         });
       }
-      #endregion
 
-      #region 生产数量变更事件处理
-      // 射箭场生产数量变更
+      private void tcNumChanged(object sender, TextChangedEventArgs e) => UpdateProductionCount(BuildingType.TownCenter, 0, sender);
       private void a_q_Changed(object sender, EventArgs e) => UpdateProductionCount(BuildingType.Archery, 0, sender);
       private void a_w_Changed(object sender, EventArgs e) => UpdateProductionCount(BuildingType.Archery, 1, sender);
       private void a_e_Changed(object sender, EventArgs e) => UpdateProductionCount(BuildingType.Archery, 2, sender);
       private void a_r_Changed(object sender, EventArgs e) => UpdateProductionCount(BuildingType.Archery, 3, sender);
-      
-      // 马厩生产数量变更
       private void s_q_Changed(object sender, EventArgs e) => UpdateProductionCount(BuildingType.Stable, 0, sender);
       private void s_w_Changed(object sender, EventArgs e) => UpdateProductionCount(BuildingType.Stable, 1, sender);
       private void s_e_Changed(object sender, EventArgs e) => UpdateProductionCount(BuildingType.Stable, 2, sender);
       private void s_r_Changed(object sender, EventArgs e) => UpdateProductionCount(BuildingType.Stable, 3, sender);
-      
-      // 兵营生产数量变更
       private void b_q_Changed(object sender, EventArgs e) => UpdateProductionCount(BuildingType.Barracks, 0, sender);
       private void b_w_Changed(object sender, EventArgs e) => UpdateProductionCount(BuildingType.Barracks, 1, sender);
       private void b_e_Changed(object sender, EventArgs e) => UpdateProductionCount(BuildingType.Barracks, 2, sender);
       private void b_r_Changed(object sender, EventArgs e) => UpdateProductionCount(BuildingType.Barracks, 3, sender);
-      
-      /// <summary>
-      /// 通用的生产数量更新方法
-      /// </summary>
-      private void UpdateProductionCount(BuildingType buildingType, int keyIndex, object sender)
+      private void b_t_Changed(object sender, EventArgs e) => UpdateProductionCount(BuildingType.Barracks, 4, sender);
+
+      private void UpdateProductionCount(BuildingType type, int slot, object sender)
       {
-         int num = int.Parse(((AduIntegerUpDown)sender).Text);
-         GetProductionArray(buildingType)[keyIndex] = num;
+         var input = (AduIntegerUpDown)sender;
+         int quantity = int.TryParse(input.Text, out int value)
+            ? Math.Clamp(value, input.Minimum, input.Maximum) : 0;
+         var state = buildings[type];
+         if (state.Quantities[slot] == quantity) return;
+         state.Quantities[slot] = quantity;
+         if (updatingControls) return;
+         CancelProductionRequests(type.ToString());
+         UpdateTimerState(state);
          CalcFarmerCount();
       }
-      #endregion
-
-
 
       private void CalcFarmerCount()
       {
-         //if (foodFarmer != null)
-         //{
-         //   foodFarmer.Text = Convert.ToDouble(calcFarmerFood()).ToString("0.00");
-
-         //}
-         //if (woodFarmer != null)
-         //{
-         //   woodFarmer.Text = Convert.ToDouble(calcFarmerWood()).ToString("0.00");
-         //}
-         //if (goldFarmer != null)
-         //{
-         //   goldFarmer.Text = Convert.ToDouble(calcFarmerGold()).ToString("0.00");
-         //}
-      }
-
-      private double CalcFarmerFood()
-      {
-         double cost = 0;
-         if (tcEnabled)
+         if (updatingControls) return;
+         var config = CurrentConfig;
+         var costs = new double[3];
+         if (config != null)
          {
-            cost += double.Parse(civConfigs[civ].tc.Split(',').Last()) > 0 ? tcNumber * double.Parse(civConfigs[civ].tc.Split(',')[0]) / double.Parse(civConfigs[civ].tc.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
+            foreach (var (type, state) in buildings.Where(pair => pair.Value.Enabled))
+            {
+               for (int i = 0; i < state.Quantities.Length; i++)
+               {
+                  double seconds = state.Timers[i].Interval.TotalSeconds;
+                  if (seconds <= 0) continue;
+                  var unit = config.Slots[type][i];
+                  for (int resource = 0; resource < costs.Length; resource++)
+                     costs[resource] += state.Quantities[i] * unit.Costs[resource] * 60 / seconds;
+               }
+            }
+            for (int resource = 0; resource < costs.Length; resource++)
+               costs[resource] /= config.GatheringRates[resource];
          }
-         if (stableEnabled)
-         {
-            cost += double.Parse(civConfigs[civ].s_q.Split(',').Last()) > 0 ? stableProd[0] * double.Parse(civConfigs[civ].s_q.Split(',')[0]) / double.Parse(civConfigs[civ].s_q.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-            cost += double.Parse(civConfigs[civ].s_w.Split(',').Last()) > 0 ? stableProd[1] * double.Parse(civConfigs[civ].s_w.Split(',')[0]) / double.Parse(civConfigs[civ].s_w.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-            cost += double.Parse(civConfigs[civ].s_e.Split(',').Last()) > 0 ? stableProd[2] * double.Parse(civConfigs[civ].s_e.Split(',')[0]) / double.Parse(civConfigs[civ].s_e.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-            cost += double.Parse(civConfigs[civ].s_r.Split(',').Last()) > 0 ? stableProd[3] * double.Parse(civConfigs[civ].s_r.Split(',')[0]) / double.Parse(civConfigs[civ].s_r.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-         }
-         if (archeryEnabled)
-         {
-            cost += double.Parse(civConfigs[civ].a_q.Split(',').Last()) > 0 ? archeryProd[0] * double.Parse(civConfigs[civ].a_q.Split(',')[0]) / double.Parse(civConfigs[civ].a_q.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-            cost += double.Parse(civConfigs[civ].a_w.Split(',').Last()) > 0 ? archeryProd[1] * double.Parse(civConfigs[civ].a_w.Split(',')[0]) / double.Parse(civConfigs[civ].a_w.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-            cost += double.Parse(civConfigs[civ].a_e.Split(',').Last()) > 0 ? archeryProd[2] * double.Parse(civConfigs[civ].a_e.Split(',')[0]) / double.Parse(civConfigs[civ].a_e.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-            cost += double.Parse(civConfigs[civ].a_r.Split(',').Last()) > 0 ? archeryProd[3] * double.Parse(civConfigs[civ].a_r.Split(',')[0]) / double.Parse(civConfigs[civ].a_r.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-         }
-         if (barracksEnabled)
-         {
-            cost += double.Parse(civConfigs[civ].b_q.Split(',').Last()) > 0 ? barracksProd[0] * double.Parse(civConfigs[civ].b_q.Split(',')[0]) / double.Parse(civConfigs[civ].b_q.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-            cost += double.Parse(civConfigs[civ].b_w.Split(',').Last()) > 0 ? barracksProd[1] * double.Parse(civConfigs[civ].b_w.Split(',')[0]) / double.Parse(civConfigs[civ].b_w.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-            cost += double.Parse(civConfigs[civ].b_e.Split(',').Last()) > 0 ? barracksProd[2] * double.Parse(civConfigs[civ].b_e.Split(',')[0]) / double.Parse(civConfigs[civ].b_e.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-            cost += double.Parse(civConfigs[civ].b_r.Split(',').Last()) > 0 ? barracksProd[3] * double.Parse(civConfigs[civ].b_r.Split(',')[0]) / double.Parse(civConfigs[civ].b_r.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-         }
-         double pd = double.Parse(civConfigs[civ].food);
-         return cost / pd;
-      }
-
-      private double CalcFarmerWood()
-      {
-         double cost = 0;
-         if (stableEnabled)
-         {
-            cost += double.Parse(civConfigs[civ].s_q.Split(',').Last()) > 0 ? stableProd[0] * double.Parse(civConfigs[civ].s_q.Split(',')[1]) / double.Parse(civConfigs[civ].s_q.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-            cost += double.Parse(civConfigs[civ].s_w.Split(',').Last()) > 0 ? stableProd[1] * double.Parse(civConfigs[civ].s_w.Split(',')[1]) / double.Parse(civConfigs[civ].s_w.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-            cost += double.Parse(civConfigs[civ].s_e.Split(',').Last()) > 0 ? stableProd[2] * double.Parse(civConfigs[civ].s_e.Split(',')[1]) / double.Parse(civConfigs[civ].s_e.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-            cost += double.Parse(civConfigs[civ].s_r.Split(',').Last()) > 0 ? stableProd[3] * double.Parse(civConfigs[civ].s_r.Split(',')[1]) / double.Parse(civConfigs[civ].s_r.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-         }
-         if (archeryEnabled)
-         {
-            cost += double.Parse(civConfigs[civ].a_q.Split(',').Last()) > 0 ? archeryProd[0] * double.Parse(civConfigs[civ].a_q.Split(',')[1]) / double.Parse(civConfigs[civ].a_q.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-            cost += double.Parse(civConfigs[civ].a_w.Split(',').Last()) > 0 ? archeryProd[1] * double.Parse(civConfigs[civ].a_w.Split(',')[1]) / double.Parse(civConfigs[civ].a_w.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-            cost += double.Parse(civConfigs[civ].a_e.Split(',').Last()) > 0 ? archeryProd[2] * double.Parse(civConfigs[civ].a_e.Split(',')[1]) / double.Parse(civConfigs[civ].a_e.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-            cost += double.Parse(civConfigs[civ].a_r.Split(',').Last()) > 0 ? archeryProd[3] * double.Parse(civConfigs[civ].a_r.Split(',')[1]) / double.Parse(civConfigs[civ].a_r.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-         }
-         if (barracksEnabled)
-         {
-            cost += double.Parse(civConfigs[civ].b_q.Split(',').Last()) > 0 ? barracksProd[0] * double.Parse(civConfigs[civ].b_q.Split(',')[1]) / double.Parse(civConfigs[civ].b_q.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-            cost += double.Parse(civConfigs[civ].b_w.Split(',').Last()) > 0 ? barracksProd[1] * double.Parse(civConfigs[civ].b_w.Split(',')[1]) / double.Parse(civConfigs[civ].b_w.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-            cost += double.Parse(civConfigs[civ].b_e.Split(',').Last()) > 0 ? barracksProd[2] * double.Parse(civConfigs[civ].b_e.Split(',')[1]) / double.Parse(civConfigs[civ].b_e.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-            cost += double.Parse(civConfigs[civ].b_r.Split(',').Last()) > 0 ? barracksProd[3] * double.Parse(civConfigs[civ].b_r.Split(',')[1]) / double.Parse(civConfigs[civ].b_r.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-         }
-         double pd = double.Parse(civConfigs[civ].wood);
-         return cost / pd;
-      }
-
-      private double CalcFarmerGold()
-      {
-         double cost = 0;
-         if (stableEnabled)
-         {
-            cost += double.Parse(civConfigs[civ].s_q.Split(',').Last()) > 0 ? stableProd[0] * double.Parse(civConfigs[civ].s_q.Split(',')[2]) / double.Parse(civConfigs[civ].s_q.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-            cost += double.Parse(civConfigs[civ].s_w.Split(',').Last()) > 0 ? stableProd[1] * double.Parse(civConfigs[civ].s_w.Split(',')[2]) / double.Parse(civConfigs[civ].s_w.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-            cost += double.Parse(civConfigs[civ].s_e.Split(',').Last()) > 0 ? stableProd[2] * double.Parse(civConfigs[civ].s_e.Split(',')[2]) / double.Parse(civConfigs[civ].s_e.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-            cost += double.Parse(civConfigs[civ].s_r.Split(',').Last()) > 0 ? stableProd[3] * double.Parse(civConfigs[civ].s_r.Split(',')[2]) / double.Parse(civConfigs[civ].s_r.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-         }
-         if (archeryEnabled)
-         {
-            cost += double.Parse(civConfigs[civ].a_q.Split(',').Last()) > 0 ? archeryProd[0] * double.Parse(civConfigs[civ].a_q.Split(',')[2]) / double.Parse(civConfigs[civ].a_q.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-            cost += double.Parse(civConfigs[civ].a_w.Split(',').Last()) > 0 ? archeryProd[1] * double.Parse(civConfigs[civ].a_w.Split(',')[2]) / double.Parse(civConfigs[civ].a_w.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-            cost += double.Parse(civConfigs[civ].a_e.Split(',').Last()) > 0 ? archeryProd[2] * double.Parse(civConfigs[civ].a_e.Split(',')[2]) / double.Parse(civConfigs[civ].a_e.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-            cost += double.Parse(civConfigs[civ].a_r.Split(',').Last()) > 0 ? archeryProd[3] * double.Parse(civConfigs[civ].a_r.Split(',')[2]) / double.Parse(civConfigs[civ].a_r.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-         }
-         if (barracksEnabled)
-         {
-            cost += double.Parse(civConfigs[civ].b_q.Split(',').Last()) > 0 ? barracksProd[0] * double.Parse(civConfigs[civ].b_q.Split(',')[2]) / double.Parse(civConfigs[civ].b_q.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-            cost += double.Parse(civConfigs[civ].b_w.Split(',').Last()) > 0 ? barracksProd[1] * double.Parse(civConfigs[civ].b_w.Split(',')[2]) / double.Parse(civConfigs[civ].b_w.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-            cost += double.Parse(civConfigs[civ].b_e.Split(',').Last()) > 0 ? barracksProd[2] * double.Parse(civConfigs[civ].b_e.Split(',')[2]) / double.Parse(civConfigs[civ].b_e.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-            cost += double.Parse(civConfigs[civ].b_r.Split(',').Last()) > 0 ? barracksProd[3] * double.Parse(civConfigs[civ].b_r.Split(',')[2]) / double.Parse(civConfigs[civ].b_r.Split(',').Last()) * SECONDS_PER_MINUTE : 0;
-         }
-         double pd = double.Parse(civConfigs[civ].gold);
-         return cost / pd;
+         FoodFarmers.Text = costs[0].ToString("0.00", CultureInfo.InvariantCulture);
+         WoodFarmers.Text = costs[1].ToString("0.00", CultureInfo.InvariantCulture);
+         GoldFarmers.Text = costs[2].ToString("0.00", CultureInfo.InvariantCulture);
       }
 
       private void Ma_Checked(object sender, RoutedEventArgs e)
       {
-         if (((AduSkin.Controls.Metro.MetroSwitch)sender).IsChecked == true)
-         {
-            intervalMultiplier *= MA_MULTIPLIER;
-         }
-         else
-         {
-            intervalMultiplier /= MA_MULTIPLIER;
-         }
+         intervalMultiplier = ((MetroSwitch)sender).IsChecked == true ? 1 / MilitaryAcademySpeed : 1;
          UpdateInterval();
       }
 
-      /// <summary>
-      /// 重置所有生产数量、开关和MA加速为初始状态
-      /// </summary>
       private void Reset_Click(object sender, RoutedEventArgs e)
       {
-         // 重置所有生产数量数组
-         for (int i = 0; i < PRODUCTION_KEYS_COUNT; i++)
+         CancelProductionRequests();
+         StopProducerTimers();
+         updatingControls = true;
+         try
          {
-            stableProd[i] = 0;
-            archeryProd[i] = 0;
-            barracksProd[i] = 0;
-         }
-         
-         // 重置TC村民数量
-         tcNumber = 0;
-         
-         // 关闭所有建筑开关、MA加速并停止定时器
-         ResetAllBuildingSwitches();
-         
-         // 更新UI控件值
-         ResetAllInputControls();
-         
-         // 更新定时器间隔（MA重置后需要重新计算）
-         UpdateInterval();
-         
-         // 重新计算农民数量
-         CalcFarmerCount();
-      }
-      
-      /// <summary>
-      /// 重置所有建筑开关为关闭状态
-      /// </summary>
-      private void ResetAllBuildingSwitches()
-      {
-         // 重置内部状态变量
-         tcEnabled = false;
-         stableEnabled = false;
-         archeryEnabled = false;
-         barracksEnabled = false;
-         
-         // 重置MA加速倍率
-         intervalMultiplier = 1.0;
-         
-         // 停止所有定时器
-         tcProducer?.Stop();
-         stableProducer?.ForEach(timer => timer?.Stop());
-         archeryProducer?.ForEach(timer => timer?.Stop());
-         barracksProducer?.ForEach(timer => timer?.Stop());
-         
-         // 重置开关控件及图标边框
-         ResetMetroSwitchControls(this);
-         StopRing(BuildingType.Archery);
-         StopRing(BuildingType.Stable);
-         StopRing(BuildingType.Barracks);
-      }
-      
-      /// <summary>
-      /// 重置所有数字输入控件的值为0
-      /// </summary>
-      private void ResetAllInputControls()
-      {
-         // 遍历控件树找到所有AduIntegerUpDown控件并重置为0
-         ResetIntegerUpDownControls(this);
-      }
-      
-      /// <summary>
-      /// 递归遍历控件树，找到并重置所有MetroSwitch控件为关闭状态
-      /// </summary>
-      private void ResetMetroSwitchControls(DependencyObject parent)
-      {
-         if (parent == null) return;
-         
-         int childCount = System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent);
-         for (int i = 0; i < childCount; i++)
-         {
-            var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
-            
-            if (child is AduSkin.Controls.Metro.MetroSwitch metroSwitch)
+            foreach (var state in buildings.Values)
             {
-               // 重置所有MetroSwitch开关，包括TC、建筑开关和MA开关
-               metroSwitch.IsChecked = false;
+               state.Enabled = false;
+               Array.Clear(state.Quantities);
+               UpdateRing(state);
             }
-            
-            // 递归处理子控件
-            ResetMetroSwitchControls(child);
+            // 逻辑树包含尚未展开的控件，避免依赖控件模板的视觉子树。
+            ResetInputControls(this);
+            intervalMultiplier = 1;
+         }
+         finally { updatingControls = false; }
+         ProductionStatus.Text = string.Empty;
+         ProductionStatus.Visibility = Visibility.Collapsed;
+         UpdateInterval(restart: true);
+      }
+
+      private static void ResetInputControls(DependencyObject parent)
+      {
+         foreach (var child in LogicalTreeHelper.GetChildren(parent).OfType<DependencyObject>())
+         {
+            if (child is MetroSwitch toggle) toggle.IsChecked = false;
+            else if (child is AduIntegerUpDown input) input.Value = 0;
+            else ResetInputControls(child);
          }
       }
-      
-      /// <summary>
-      /// 递归遍历控件树，找到并重置所有AduIntegerUpDown控件
-      /// </summary>
-      private void ResetIntegerUpDownControls(DependencyObject parent)
+
+      private sealed class BuildingState
       {
-         if (parent == null) return;
-         
-         int childCount = System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent);
-         for (int i = 0; i < childCount; i++)
+         public bool Enabled { get; set; }
+         public int[] Quantities { get; }
+         public DispatcherTimer[] Timers { get; }
+         public Shape Ring { get; set; }
+
+         public BuildingState(int slots)
          {
-            var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
-            
-            if (child is AduSkin.Controls.Metro.AduIntegerUpDown integerUpDown)
-            {
-               integerUpDown.Value = 0;
-            }
-            
-            // 递归处理子控件
-            ResetIntegerUpDownControls(child);
+            Quantities = new int[slots];
+            Timers = Enumerable.Range(0, slots).Select(_ => new DispatcherTimer()).ToArray();
          }
       }
    }
 }
-#endregion

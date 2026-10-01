@@ -1,4 +1,6 @@
 E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\publish\Aoe4Helper.exe
+E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\publish\prod.tab
+E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\publish\Production\Lua\production_bridge.lua
 E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\publish\Aoe4Helper.dll
 E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\publish\Aoe4Helper.deps.json
 E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\publish\Aoe4Helper.runtimeconfig.json
@@ -32,11 +34,9 @@ E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\publish\Mic
 E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\publish\Microsoft.Extensions.Options.dll
 E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\publish\Microsoft.Extensions.Options.ConfigurationExtensions.dll
 E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\publish\Microsoft.Extensions.Primitives.dll
-E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\publish\System.Diagnostics.EventLog.dll
 E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\publish\System.Management.dll
 E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\publish\System.Runtime.Caching.dll
 E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\publish\YamlDotNet.dll
-E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\publish\runtimes\win\lib\net9.0\System.Diagnostics.EventLog.dll
 E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\publish\runtimes\win\lib\net8.0\System.Management.dll
 E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\publish\runtimes\win\lib\net6.0\System.Runtime.Caching.dll
 E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\publish\AduSkin.dll

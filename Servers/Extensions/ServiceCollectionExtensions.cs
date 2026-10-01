@@ -26,7 +26,7 @@ namespace AduSkin.Demo.Servers.Extensions
                     && x.Namespace!.StartsWith(namespaceName, StringComparison.InvariantCultureIgnoreCase)
                 );
 
-            foreach (Type? type in types)
+            foreach (Type type in types)
             {
                if (services.All(x => x.ServiceType != type))
                {

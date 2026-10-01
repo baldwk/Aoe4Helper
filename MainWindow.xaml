@@ -5,7 +5,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:AduAttach="clr-namespace:AduSkin.Controls.Attach;assembly=AduSkin"
-      Title="WKY.Aoe4Helper" SizeToContent="WidthAndHeight" Topmost="True" ResizeMode="NoResize" Width="285">
+      Title="WKY.Aoe4Helper" SizeToContent="WidthAndHeight" Topmost="True" ShowActivated="False" ResizeMode="NoResize" Width="285">
    <Grid HorizontalAlignment="Left" Width="285">
         <Grid.RowDefinitions>
             <RowDefinition Height="0*"/>
@@ -13,11 +13,23 @@
             <RowDefinition Height="34*"/>
             <RowDefinition Height="95*"/>
         </Grid.RowDefinitions>
-        <Border Style="{StaticResource ShowControlBorder}" Margin="10,10,10,10" Padding="0,0,0,0"  Background="Transparent" Grid.RowSpan="3" Grid.Row="1">
+        <Border Style="{StaticResource ShowControlBorder}" Effect="{x:Null}" Margin="10,10,10,10" Padding="0,0,0,0"  Background="Transparent" Grid.RowSpan="3" Grid.Row="1">
             <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Horizontal">
                     <AduSkin:AduFormLable Title="CIV" Margin="0,0,0,0" HorizontalAlignment="Left">
-                        <AduSkin:AduComboBox SelectionChanged="Civ_Changed" Width="90" Height="40" HorizontalAlignment="Left">
+                        <Grid Width="90" Height="40">
+                        <AduSkin:AduComboBox x:Name="CivilizationSelector" SelectionChanged="Civ_Changed" SelectedIndex="-1"
+                                            Width="90" Height="40" HorizontalAlignment="Left" AduAttach:InputAttach.InputHint="">
+                            <AduSkin:AduComboBox.Resources>
+                                <Style TargetType="{x:Type Image}">
+                                    <Setter Property="Width" Value="52"/>
+                                    <Setter Property="Height" Value="28"/>
+                                    <Setter Property="Stretch" Value="Uniform"/>
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="UseLayoutRounding" Value="True"/>
+                                </Style>
+                            </AduSkin:AduComboBox.Resources>
                             <ComboBoxItem Name="abbasid_dynasty">
                                 <Image Source="/Resources/Img/flags/abbasid_dynasty-b722e3e4ee862226395c692e73cd14c18bc96c3469874d2e0d918305c70f8a69.png" />
                             </ComboBoxItem>
@@ -54,7 +66,10 @@
                             <ComboBoxItem Name="mongols" >
                                 <Image Source="/Resources/Img/flags/mongols-7ce0478ab2ca1f95d0d879fecaeb94119629538e951002ac6cb936433c575105.png"/>
                             </ComboBoxItem>
-                            <ComboBoxItem Name="order_of_the_dragon" >
+                           <ComboBoxItem Name="golden_horde" >
+                              <Image Source="/Resources/Img/flags/golden_horde.png"/>
+                           </ComboBoxItem>
+                           <ComboBoxItem Name="order_of_the_dragon" >
                                 <Image Source="/Resources/Img/flags/order_of_the_dragon-cad6fa9212fd59f9b52aaa83b4a6173f07734d38d37200f976bcd46827667424.png"/>
                             </ComboBoxItem>
                             <ComboBoxItem Name="ottomans" >
@@ -72,16 +87,44 @@
                             <ComboBoxItem Name="lancaster" >
                                 <Image Source="/Resources/Img/flags/lancaster.png"/>
                             </ComboBoxItem>
+                            <ComboBoxItem Name="macedonian_dynasty" ToolTip="马其顿王朝">
+                                <Image Source="/Resources/Img/flags/macedonian_dynasty.png"/>
+                            </ComboBoxItem>
+                            <ComboBoxItem Name="sengoku_daimyo" ToolTip="战国大名">
+                                <Image Source="/Resources/Img/flags/sengoku_daimyo.png"/>
+                            </ComboBoxItem>
+                            <ComboBoxItem Name="tughlaq_dynasty" ToolTip="图格鲁克王朝">
+                                <Image Source="/Resources/Img/flags/tughlaq_dynasty.png"/>
+                            </ComboBoxItem>
+                            <ComboBoxItem Name="jin_dynasty" ToolTip="金朝">
+                                <Image Source="/Resources/Img/flags/jin_dynasty.png"/>
+                            </ComboBoxItem>
                         </AduSkin:AduComboBox>
+                        <Border Width="52" Height="28" Margin="5,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                Background="#F2F2F2" BorderBrush="#B8B8B8" BorderThickness="1" IsHitTestVisible="False">
+                            <Border.Style>
+                                <Style TargetType="{x:Type Border}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedIndex, ElementName=CivilizationSelector}" Value="-1">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <TextBlock Text="?" FontSize="18" Foreground="#777777" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        </Grid>
                     </AduSkin:AduFormLable>
                     <Button Content="Reset" Click="Reset_Click" Width="50" Height="25" Margin="10,0,0,0" VerticalAlignment="Center" />
                 </StackPanel>
+                <TextBlock x:Name="ProductionStatus" Visibility="Collapsed" Margin="10,5,10,5" MaxWidth="235" TextWrapping="Wrap" FontSize="11"/>
                 <AduSkin:AduExpander Header="Auto Training" IsEnabled="True" IsExpanded="True" AduAttach:PathDataAttach.PathData="{StaticResource Icon_Logo}" AduAttach:PathDataAttach.Width="14" AduAttach:PathDataAttach.Margin="4,0,10,2">
                     <StackPanel Orientation="Vertical">
                         <WrapPanel Width="253">
                             <AduSkin:MetroSwitch Margin="10" BorderCornerRadius="3" Content="TC" CornerRadius="2" Checked="Tc_Checked" Unchecked="Tc_Checked"/>
                             <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" UpDownOrientation="Horizontal" TextChanged="tcNumChanged" Height="19" />
-                            <AduSkin:MetroSwitch Margin="10" BorderCornerRadius="3" Content="MA" CornerRadius="2" Checked="Ma_Checked" Unchecked="Ma_Checked"/>
+                            <AduSkin:MetroSwitch Margin="10" BorderCornerRadius="3" Content="MA" ToolTip="军事学院：军队训练速度 +33%，村民时间不变" CornerRadius="2" Checked="Ma_Checked" Unchecked="Ma_Checked"/>
                         </WrapPanel>
                         <WrapPanel>
                             <Grid Margin="3" Cursor="Hand" MouseDown="Archery_Clicked" Width="36" Height="36">
@@ -92,10 +135,14 @@
                             <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="a_q_Changed" Height="19" Width="40" />
                             <TextBlock Text="W" Height="19" Margin="1" FontSize="16"/>
                             <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="a_w_Changed" Height="19" Width="40" />
-                            <TextBlock Text="E" Height="19" Margin="1" FontSize="16"/>
-                            <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="a_e_Changed" Height="19" Width="40" />
-                            <TextBlock Text="R" Height="19" Margin="1" FontSize="16"/>
-                            <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="a_r_Changed" Height="19" Width="40" />
+                            <StackPanel x:Name="ArcheryESlot" Orientation="Horizontal">
+                                <TextBlock Text="E" Height="19" Margin="1" FontSize="16"/>
+                                <AduSkin:AduIntegerUpDown x:Name="ArcheryECount" Maximum="10" Minimum="0" Value="0" TextChanged="a_e_Changed" Height="19" Width="40" />
+                            </StackPanel>
+                            <StackPanel x:Name="ArcheryRSlot" Orientation="Horizontal">
+                                <TextBlock Text="R" Height="19" Margin="1" FontSize="16"/>
+                                <AduSkin:AduIntegerUpDown x:Name="ArcheryRCount" Maximum="10" Minimum="0" Value="0" TextChanged="a_r_Changed" Height="19" Width="40" />
+                            </StackPanel>
 
                         </WrapPanel>
                         <WrapPanel>
@@ -107,10 +154,14 @@
                             <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="s_q_Changed" Height="19" Width="40" />
                             <TextBlock Text="W" Height="19" Margin="1" FontSize="16"/>
                             <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="s_w_Changed" Height="19" Width="40" />
-                            <TextBlock Text="E" Height="19" Margin="1" FontSize="16"/>
-                            <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="s_e_Changed" Height="19" Width="40" />
-                            <TextBlock Text="R" Height="19" Margin="1" FontSize="16"/>
-                            <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="s_r_Changed" Height="19" Width="40" />
+                            <StackPanel x:Name="StableESlot" Orientation="Horizontal">
+                                <TextBlock Text="E" Height="19" Margin="1" FontSize="16"/>
+                                <AduSkin:AduIntegerUpDown x:Name="StableECount" Maximum="10" Minimum="0" Value="0" TextChanged="s_e_Changed" Height="19" Width="40" />
+                            </StackPanel>
+                            <StackPanel x:Name="StableRSlot" Orientation="Horizontal">
+                                <TextBlock Text="R" Height="19" Margin="1" FontSize="16"/>
+                                <AduSkin:AduIntegerUpDown x:Name="StableRCount" Maximum="10" Minimum="0" Value="0" TextChanged="s_r_Changed" Height="19" Width="40" />
+                            </StackPanel>
                         </WrapPanel>
                         <WrapPanel>
                             <Grid Margin="3" Cursor="Hand" MouseDown="Barracks_Clicked" Width="36" Height="36">
@@ -121,13 +172,29 @@
                             <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="b_q_Changed" Height="19" Width="40" />
                             <TextBlock Text="W" Height="19" Margin="1" FontSize="16"/>
                             <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="b_w_Changed" Height="19" Width="40" />
-                            <TextBlock Text="E" Height="19" Margin="1" FontSize="16"/>
-                            <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="b_e_Changed" Height="19" Width="40" />
-                            <TextBlock Text="R" Height="19" Margin="1" FontSize="16"/>
-                            <AduSkin:AduIntegerUpDown Maximum="10" Minimum="0" Value="0" TextChanged="b_r_Changed" Height="19" Width="40" />
+                            <StackPanel x:Name="BarracksESlot" Orientation="Horizontal">
+                                <TextBlock Text="E" Height="19" Margin="1" FontSize="16"/>
+                                <AduSkin:AduIntegerUpDown x:Name="BarracksECount" Maximum="10" Minimum="0" Value="0" TextChanged="b_e_Changed" Height="19" Width="40" />
+                            </StackPanel>
+                            <StackPanel x:Name="BarracksRSlot" Orientation="Horizontal">
+                                <TextBlock Text="R" Height="19" Margin="1" FontSize="16"/>
+                                <AduSkin:AduIntegerUpDown x:Name="BarracksRCount" Maximum="10" Minimum="0" Value="0" TextChanged="b_r_Changed" Height="19" Width="40" />
+                            </StackPanel>
+                            <StackPanel x:Name="BarracksTSlot" Orientation="Horizontal" ToolTip="条顿骑士">
+                                <TextBlock Text="T" Height="19" Margin="1" FontSize="16"/>
+                                <AduSkin:AduIntegerUpDown x:Name="BarracksTCount" Maximum="10" Minimum="0" Value="0" TextChanged="b_t_Changed" Height="19" Width="40" />
+                            </StackPanel>
                         </WrapPanel>
                     </StackPanel>
                 </AduSkin:AduExpander>
+                <StackPanel Margin="10,6,10,10" ToolTip="持续生产的保守估算；按基础采集效率计算，仅计龙之骑士团和图格鲁克的固定加成。">
+                    <TextBlock Text="采集人数估算" FontSize="11" Margin="0,0,0,4"/>
+                    <UniformGrid Columns="3">
+                        <StackPanel><TextBlock Text="食物" FontSize="11"/><TextBlock x:Name="FoodFarmers" Text="0.00" FontSize="14"/></StackPanel>
+                        <StackPanel><TextBlock Text="木材" FontSize="11"/><TextBlock x:Name="WoodFarmers" Text="0.00" FontSize="14"/></StackPanel>
+                        <StackPanel><TextBlock Text="黄金" FontSize="11"/><TextBlock x:Name="GoldFarmers" Text="0.00" FontSize="14"/></StackPanel>
+                    </UniformGrid>
+                </StackPanel>
             </StackPanel>
         </Border>
     </Grid>

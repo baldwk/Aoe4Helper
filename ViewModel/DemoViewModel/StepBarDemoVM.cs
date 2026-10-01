@@ -42,7 +42,7 @@ namespace AduSkin.Demo.ViewModel.DemoViewModel
       [RelayCommand]
       public void Next(string e)
       {
-         if (StepIndex >= StepItems.Count)
+         if (StepIndex >= StepItems.Count - 1)
             return;
          StepIndex += 1;
       }

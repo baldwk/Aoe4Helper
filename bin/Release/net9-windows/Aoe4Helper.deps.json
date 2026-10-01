@@ -6,7 +6,7 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v9.0": {
-      "Aoe4Helper/1.0.0": {
+      "Aoe4Helper/1.2.0": {
         "dependencies": {
           "AduSkin": "1.2.0",
           "CommunityToolkit.Mvvm": "8.4.0",
@@ -408,22 +408,7 @@
           "System.Security.Permissions": "6.0.0"
         }
       },
-      "System.Diagnostics.EventLog/9.0.2": {
-        "runtime": {
-          "lib/net9.0/System.Diagnostics.EventLog.dll": {
-            "assemblyVersion": "9.0.0.0",
-            "fileVersion": "9.0.225.6610"
-          }
-        },
-        "runtimeTargets": {
-          "runtimes/win/lib/net9.0/System.Diagnostics.EventLog.dll": {
-            "rid": "win",
-            "assetType": "runtime",
-            "assemblyVersion": "9.0.0.0",
-            "fileVersion": "9.0.225.6610"
-          }
-        }
-      },
+      "System.Diagnostics.EventLog/9.0.2": {},
       "System.Drawing.Common/6.0.0": {
         "dependencies": {
           "Microsoft.Win32.SystemEvents": "6.0.0"
@@ -511,7 +496,7 @@
     }
   },
   "libraries": {
-    "Aoe4Helper/1.0.0": {
+    "Aoe4Helper/1.2.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

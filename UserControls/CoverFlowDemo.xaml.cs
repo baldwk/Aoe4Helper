@@ -12,20 +12,8 @@ namespace AduSkin.Demo.UserControls
       {
          InitializeComponent();
          
-         #region 轮播
-         ObservableCollection<Models.Carousel> list = new ObservableCollection<Models.Carousel>();
-         for (int i = 0; i < 5; i++)
-         {
-            list.Add(new Models.Carousel()
-            {
-               imgpath = "../Resources/aduskin.png",
-               name = "AduSkin",
-               info = "追求极致，永臻完美"
-            });
-         }
-         this.CoverFlowMain.ItemsSource = list;
+         CoverFlowMain.ItemsSource = AduSkin.Demo.Data.CarouselSamples.Create();
          CoverFlowMain.JumpTo(2);
-         #endregion
       }
    }
 }

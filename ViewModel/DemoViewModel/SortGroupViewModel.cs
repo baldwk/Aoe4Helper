@@ -68,85 +68,44 @@ namespace AduSkin.Demo.ViewModel
          item7.Describe = "不需要太多";
          tempContactList.Add(item7);
 
-         contactList = Sort(tempContactList);
+         ContactList = new ObservableCollection<ChatUserModel>(Sort(tempContactList));
+         SortID = new ObservableCollection<ChatUserModel>(ContactList.Where(item => item.ContactType == ContactType.SerialNumber));
       }
 
-      /// <summary>
-      /// 排序
-      /// </summary>
-      /// <param name="Temps"></param>
-      /// <returns></returns>
-      public List<ChatUserModel> Sort(List<ChatUserModel> Temps)
+      public List<ChatUserModel> Sort(List<ChatUserModel> contacts)
       {
-         List<ChatUserModel> ResultList = new List<ChatUserModel>();
-         Dictionary<string, List<ChatUserModel>> dic = new Dictionary<string, List<ChatUserModel>>();
-         List<string> sorts = new List<string>() { "群组", "A", "B", "C", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "#" };
-         foreach (var item in sorts)
-            dic.Add(item, new List<ChatUserModel>());
-         //将对象按字母顺序存起来
-         for (int i = 0; i < Temps.Count; i++)
+         var order = new[] { "群组" }.Concat(Enumerable.Range('A', 26).Select(c => ((char)c).ToString())).Append("#");
+         var groups = contacts.Where(item => item.ContactType != ContactType.SerialNumber)
+            .GroupBy(item => item.ContactType == ContactType.Group ? "群组" : GetSortKey(item.UserName))
+            .ToDictionary(group => group.Key, group => group.ToList());
+         var result = new List<ChatUserModel>();
+         foreach (string key in order)
          {
-            //群组
-            if (Temps[i].ContactType == ContactType.Group)
+            if (!groups.TryGetValue(key, out var members)) continue;
+            result.Add(new ChatUserModel { SortID = key, ContactType = ContactType.SerialNumber });
+            foreach (var member in members)
             {
-               dic["群组"].Add(Temps[i]);
-               continue;
-            }
-            //个人
-            var subhead = AduSkin.Utility.Extend.StringExtend.GetFirstPinyin(Temps[i].UserName);
-            Temps[i].SortID = subhead;
-            if (dic.ContainsKey(subhead))
-               dic[subhead].Add(Temps[i]);
-         }
-         //先把群组存入列表
-         var groupsort = new ChatUserModel() { SortID = "群组", ContactType = ContactType.SerialNumber };
-         ResultList.Add(groupsort);
-         foreach (var item in dic["群组"])
-         {
-            ResultList.Add(item);
-         }
-
-         foreach (var item in dic)
-         {
-            if (item.Value.Count <= 0 || item.Key == "群组")
-            {
-               continue;
-            }
-            var sortid = new ChatUserModel() { SortID = item.Key, ContactType = ContactType.SerialNumber };
-            if (!ResultList.Contains(sortid))
-            {
-               ResultList.Add(sortid);
-            }
-            foreach (var chatuser in item.Value)
-            {
-               chatuser.ContactType = ContactType.Single;
-               ResultList.Add(chatuser);
+               member.SortID = key;
+               result.Add(member);
             }
          }
-         return ResultList;
+         return result;
       }
 
-      private List<ChatUserModel> contactList;
-      /// <summary>
-      /// 联系人列表
-      /// </summary>
-      public ObservableCollection<ChatUserModel> ContactList
+      private static string GetSortKey(string name)
       {
-         get
-         {
-            return new ObservableCollection<ChatUserModel>(contactList);
-         }
+         if (string.IsNullOrWhiteSpace(name)) return "#";
+         char first = char.ToUpperInvariant(name[0]);
+         if (first >= 'A' && first <= 'Z') return first.ToString();
+         // 拼音工具要求双字节汉字；其他字符归入 #，避免丢失联系人。
+         if (first < 0x4E00 || first > 0x9FFF ||
+             System.Text.Encoding.GetEncoding("GB2312").GetByteCount(first.ToString()) != 2) return "#";
+         string key = AduSkin.Utility.Extend.StringExtend.GetFirstPinyin(name).ToUpperInvariant();
+         return key.Length == 1 && key[0] >= 'A' && key[0] <= 'Z' ? key : "#";
       }
-      /// <summary>
-      /// 序号列表
-      /// </summary>
-      public ObservableCollection<ChatUserModel> SortID
-      {
-         get
-         {
-            return new ObservableCollection<ChatUserModel>(contactList.Where(a => a.ContactType == ContactType.SerialNumber));
-         }
-      }
+
+      public ObservableCollection<ChatUserModel> ContactList { get; }
+      public ObservableCollection<ChatUserModel> SortID { get; }
 
       private ChatUserModel _CurrentChatUserModel;
       /// <summary>
@@ -157,10 +116,7 @@ namespace AduSkin.Demo.ViewModel
          get { return _CurrentChatUserModel; }
          set
          {
-            if (value.ContactType == ContactType.SerialNumber)
-            {
-               IsOpenSortList = true;
-            }
+            IsOpenSortList = value?.ContactType == ContactType.SerialNumber;
             SetProperty(ref _CurrentChatUserModel, value);
          }
       }

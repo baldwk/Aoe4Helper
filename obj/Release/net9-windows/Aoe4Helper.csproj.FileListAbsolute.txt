@@ -1263,11 +1263,9 @@ E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\Microsoft.E
 E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\Microsoft.Extensions.Options.dll
 E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\Microsoft.Extensions.Options.ConfigurationExtensions.dll
 E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\Microsoft.Extensions.Primitives.dll
-E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\System.Diagnostics.EventLog.dll
 E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\System.Management.dll
 E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\System.Runtime.Caching.dll
 E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\YamlDotNet.dll
-E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\runtimes\win\lib\net9.0\System.Diagnostics.EventLog.dll
 E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\runtimes\win\lib\net8.0\System.Management.dll
 E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\runtimes\win\lib\net6.0\System.Runtime.Caching.dll
 E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\AduSkin.dll
@@ -1294,7 +1292,6 @@ E:\c# project\AduSkin-master\src\Aoe4Helper\obj\Release\net9-windows\UserControl
 E:\c# project\AduSkin-master\src\Aoe4Helper\obj\Release\net9-windows\UserControls\CoverFlowDemo.g.cs
 E:\c# project\AduSkin-master\src\Aoe4Helper\obj\Release\net9-windows\UserControls\ExpanderMenu.g.cs
 E:\c# project\AduSkin-master\src\Aoe4Helper\obj\Release\net9-windows\UserControls\FormVerificationDemo.g.cs
-E:\c# project\AduSkin-master\src\Aoe4Helper\obj\Release\net9-windows\UserControls\HttpTool.g.cs
 E:\c# project\AduSkin-master\src\Aoe4Helper\obj\Release\net9-windows\UserControls\ImageTool.g.cs
 E:\c# project\AduSkin-master\src\Aoe4Helper\obj\Release\net9-windows\UserControls\MessageBoxDemo.g.cs
 E:\c# project\AduSkin-master\src\Aoe4Helper\obj\Release\net9-windows\UserControls\MultiFunctionTabControl.g.cs
@@ -1318,7 +1315,6 @@ E:\c# project\AduSkin-master\src\Aoe4Helper\obj\Release\net9-windows\Style\Conve
 E:\c# project\AduSkin-master\src\Aoe4Helper\obj\Release\net9-windows\UserControls\BaiduTranslate.baml
 E:\c# project\AduSkin-master\src\Aoe4Helper\obj\Release\net9-windows\UserControls\ExpanderMenu.baml
 E:\c# project\AduSkin-master\src\Aoe4Helper\obj\Release\net9-windows\UserControls\FormVerificationDemo.baml
-E:\c# project\AduSkin-master\src\Aoe4Helper\obj\Release\net9-windows\UserControls\HttpTool.baml
 E:\c# project\AduSkin-master\src\Aoe4Helper\obj\Release\net9-windows\UserControls\ImageTool.baml
 E:\c# project\AduSkin-master\src\Aoe4Helper\obj\Release\net9-windows\UserControls\MessageBoxDemo.baml
 E:\c# project\AduSkin-master\src\Aoe4Helper\obj\Release\net9-windows\UserControls\NoticeDemo.baml
@@ -1341,3 +1337,6 @@ E:\c# project\AduSkin-master\src\Aoe4Helper\obj\Release\net9-windows\ref\Aoe4Hel
 E:\c# project\AduSkin-master\src\Aoe4Helper\obj\Release\net9-windows\Aoe4Helper.Properties.Resources.resources
 E:\c# project\AduSkin-master\src\Aoe4Helper\obj\Release\net9-windows\Aoe4Helper.csproj.GenerateResource.cache
 E:\c# project\AduSkin-master\src\Aoe4Helper\obj\Release\net9-windows\Aoe4Helper.sourcelink.json
+E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\prod.tab
+E:\c# project\AduSkin-master\src\Aoe4Helper\obj\Release\net9-windows\Aoe4Helper_Content.g.cs
+E:\c# project\AduSkin-master\src\Aoe4Helper\bin\Release\net9-windows\Production\Lua\production_bridge.lua

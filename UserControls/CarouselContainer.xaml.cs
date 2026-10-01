@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -25,19 +25,7 @@ namespace AduSkin.Demo.UserControls
       {
          InitializeComponent();
 
-         #region 轮播
-         ObservableCollection<Models.Carousel> list = new ObservableCollection<Models.Carousel>();
-         for (int i = 0; i < 5; i++)
-         {
-            list.Add(new Models.Carousel()
-            {
-               imgpath = "../Resources/aduskin.png",
-               name = "AduSkin",
-               info = "追求极致，永臻完美"
-            });
-         }
-         this.Carousels.ItemsSource = list;
-         #endregion
+         Carousels.ItemsSource = AduSkin.Demo.Data.CarouselSamples.Create();
       }
    }
 }
